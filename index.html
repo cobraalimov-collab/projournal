@@ -714,7 +714,8 @@ if (qs.has('unlocked') || qs.has('access')) try { history.replaceState(null, '',
 if (!isUnlocked()) $('#gate').classList.remove('hidden');
 
 $('#payBtn').onclick = () => { window.location.href = PAY_URL; };
-$('#cryptoBtn').onclick = () => { window.location.href = PAY_URL; };
+const CRYPTO_URL = 'https://app.paymento.io/payment-link/eca6e71daae142e08654b6f0d26e78d7';
+$('#cryptoBtn').onclick = () => { window.location.href = CRYPTO_URL; };
 $('#backupToggle').onclick = () => $('#backupBox').classList.toggle('hidden');
 $('#unlock').onclick = () => {
   if ($('#lic').value.trim().toUpperCase() === BACKUP_CODE) { grantAccess(); $('#gerr').textContent = ''; }
