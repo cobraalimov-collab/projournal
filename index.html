@@ -1,14 +1,18 @@
 <!DOCTYPE html>
 <!--
 =====================================================================
-  TRADING JURNALI — AUTO-UNLOCK PAYWALL + NOTION-STYLE JOURNAL
+  TRADING JURNALI — AUTO-UNLOCK PAYWALL ($50 Lifetime)
 =====================================================================
-  SETUP (edit only the CONFIG block in the <script> section):
-    1. CARD_PAYMENT_URL   -> card checkout link (Lemon Squeezy / Gumroad / Stripe)
-    2. CRYPTO_PAYMENT_URL -> USDT checkout link (Cryptomus / NOWPayments)
-    3. SUCCESS_PARAM / SUCCESS_VALUE -> gateway return URL, e.g. ?access=granted
-    4. OWNER_PARAM / OWNER_SECRET    -> owner unlock, e.g. ?owner=alimov
-    5. VERIFY_URL -> optional Cloudflare Worker that confirms payments
+  SETUP (edit only the CONFIG block below):
+    1. CARD_PAYMENT_URL   -> your card checkout link (Lemon Squeezy / Gumroad / Stripe)
+    2. CRYPTO_PAYMENT_URL -> your USDT checkout link (Cryptomus / NOWPayments)
+    3. SUCCESS_PARAM      -> the success parameter your gateway returns to,
+                             e.g. "access" and SUCCESS_VALUE "granted"
+                             -> set the gateway's "return/success URL" to:
+                                https://YOUR-SITE.vercel.app/?access=granted
+    4. OWNER_SECRET       -> your private owner key: https://YOUR-SITE/?owner=alimov
+    5. VERIFY_URL         -> (recommended) Cloudflare Worker that confirms the
+                             payment before unlocking. Leave "" to trust the redirect.
 
   Deploy: push to GitHub, import on Vercel (no build step).
 =====================================================================
@@ -25,169 +29,120 @@
   html,body{margin:0;background:var(--bg);color:var(--text);
     font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
   .hidden{display:none!important}
-  button,select,input{font:inherit}
+  input,select,button{font:inherit}
+  input,select{background:#0F0F15;color:var(--text);border:1px solid var(--line);
+    border-radius:8px;padding:7px 8px;min-width:0}
+  input:focus,select:focus{outline:1px solid var(--gold)}
 
-  /* ---------- BOOT ---------- */
+  /* ---------- BOOT LOADER ---------- */
   #boot{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
     background:var(--bg);z-index:50;color:var(--gold);font-size:17px;font-weight:600}
   #boot.done{display:none}
-  #confirmed{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
-    background:rgba(11,11,15,.95);z-index:40;color:var(--g);font-size:20px;font-weight:700}
 
   /* ---------- PAYWALL ---------- */
   #paywall{min-height:100vh;display:flex;justify-content:center;align-items:flex-start;
     padding:28px 16px;position:relative;overflow:hidden}
   .preview{position:absolute;inset:0;padding:24px;filter:blur(7px) saturate(.7);
     opacity:.45;pointer-events:none;user-select:none}
-  .pv-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px;height:110px}
-  .pv-chart{height:180px;background:linear-gradient(180deg,#1d1d28,#15151C);border-radius:14px;border:1px solid var(--line)}
+  .preview .pv-card{background:var(--card);border:1px solid var(--line);border-radius:14px;
+    padding:14px;margin-bottom:14px;height:110px}
+  .preview .pv-chart{height:180px;background:linear-gradient(180deg,#1d1d28,#15151C);
+    border-radius:14px;border:1px solid var(--line)}
   .pw-card{position:relative;z-index:2;width:100%;max-width:440px;background:rgba(21,21,28,.96);
     border:1px solid var(--line);border-radius:20px;padding:26px 22px;
     box-shadow:0 20px 60px rgba(0,0,0,.6);margin-top:20px;text-align:center}
-  .badge{display:inline-block;font-size:12px;color:var(--gold);border:1px solid var(--gold);border-radius:999px;padding:4px 12px;margin-bottom:12px}
+  .badge{display:inline-block;font-size:12px;color:var(--gold);border:1px solid var(--gold);
+    border-radius:999px;padding:4px 12px;margin-bottom:12px}
   .pw-card h1{margin:4px 0 6px;font-size:28px}
   .sub{color:var(--mut);margin:0 0 16px;font-size:15px}
   .features{list-style:none;padding:0;margin:0 0 18px;text-align:left;display:grid;gap:8px}
   .features li{background:#0F0F15;border:1px solid var(--line);border-radius:10px;padding:10px 12px}
   .price{font-size:20px;font-weight:700;color:var(--gold);margin-bottom:16px}
   .price small{display:block;font-size:13px;color:var(--mut);font-weight:400}
-  .btn{display:block;text-decoration:none;color:#fff;font-weight:700;border-radius:12px;padding:15px;margin:10px 0;font-size:16px;border:0;cursor:pointer;transition:transform .1s}
+  .btn{display:block;text-decoration:none;color:#fff;font-weight:700;border-radius:12px;
+    padding:15px;margin:10px 0;font-size:16px;border:0;cursor:pointer;transition:transform .1s}
   .btn:active{transform:scale(.98)}
   .btn-card{background:linear-gradient(135deg,#F5B82E,#E0930B);color:#111}
   .btn-crypto{background:linear-gradient(135deg,#22C55E,#15803D)}
 
-  /* ---------- APP LAYOUT ---------- */
-  #app{padding:16px;max-width:1600px;margin:0 auto}
+  /* ---------- PAYMENT CONFIRMED OVERLAY ---------- */
+  #confirmed{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(11,11,15,.95);z-index:40;color:var(--g);font-size:20px;font-weight:700}
+
+  /* ---------- APP ---------- */
+  #app{padding:16px;max-width:1400px;margin:0 auto}
   header{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;align-items:center;margin-bottom:14px}
   header h1{font-size:22px;margin:0}
   .hdr-right{display:flex;gap:10px;align-items:center;flex-wrap:wrap;color:var(--mut);font-size:14px}
-  .hdr-right input{width:120px;background:#0F0F15;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 8px}
-  .owner-tag{color:var(--gold);font-size:12px;border:1px solid var(--gold);border-radius:6px;padding:2px 6px}
-  .ghost{background:transparent;color:var(--mut);border:1px solid var(--line);border-radius:8px;padding:7px 11px;cursor:pointer}
-  .ghost:hover{color:var(--text)}
+  .hdr-right input{width:120px}
+  .admin-tag{color:var(--gold);font-size:12px;border:1px solid var(--gold);border-radius:6px;padding:2px 6px}
+  .ghost{background:transparent;color:var(--mut);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer}
   .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
   .stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
   .stat .l{color:var(--mut);font-size:12px}
   .stat .v{font-size:20px;font-weight:700;margin-top:4px}
   .panel{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
   .panel h3{margin:0 0 10px;font-size:15px;color:var(--mut);font-weight:600}
-  #chart1{width:100%;height:220px;display:block}
-  #chart2{width:100%;display:block;cursor:pointer}
-  .pos{color:var(--g)} .neg{color:var(--r)}
-  .empty{color:var(--mut);text-align:center;padding:22px 0}
-
-  /* stats table */
+  #chart{width:100%;height:220px;display:block}
   .scroll{overflow-x:auto}
-  .mtable{width:100%;border-collapse:collapse;font-size:13px}
-  .mtable th,.mtable td{padding:7px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
-  .mtable th{color:var(--mut);font-weight:600}
-
-  /* toolbar */
-  .toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
-  .toolbar label.flt{color:var(--mut);font-size:12px;display:flex;flex-direction:column;gap:4px}
-  .sel-f{background:#0F0F15;color:var(--text);border:1px solid var(--line);border-radius:8px;padding:7px 8px;min-width:140px}
-  .wrapRel{position:relative}
-  #colsMenu{position:absolute;top:100%;right:0;margin-top:6px;background:var(--card);border:1px solid var(--line);
-    border-radius:12px;padding:10px;display:grid;gap:6px;z-index:20;min-width:210px;box-shadow:0 12px 30px rgba(0,0,0,.5)}
-  .colchk{display:flex;gap:8px;align-items:center;font-size:13px;color:var(--text);cursor:pointer}
-  .upl{position:relative;cursor:pointer;display:inline-block}
-
-  /* journal table */
-  .wrapTable{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:#111118}
-  #jtable{min-width:1600px;border-collapse:separate;border-spacing:0;font-size:13px}
-  #jtable th,#jtable td{border-bottom:1px solid var(--line);padding:7px 8px;vertical-align:middle;white-space:nowrap;text-align:left}
-  #jtable th{position:sticky;top:0;background:#101016;color:var(--mut);font-weight:600;z-index:1}
-  #jtable tbody tr:hover td{background:rgba(255,255,255,.02)}
-  #jtable input,#jtable select{background:transparent;border:1px solid transparent;border-radius:6px;padding:5px 6px;color:var(--text);min-width:0;width:100%}
-  #jtable input:hover{border-color:var(--line)}
-  #jtable input:focus{border-color:var(--gold);background:#0F0F15;outline:none}
-  #jtable input[type=datetime-local]{width:190px;color-scheme:dark}
-  #jtable .narrow{width:96px}
-  #jtable .wide{width:240px}
-  #jtable select.sel{width:auto;border-radius:999px;font-weight:600;cursor:pointer;padding:4px 10px;background:#0F0F15;border:1px solid var(--line)}
-  #jtable th:nth-child(6),#jtable td:nth-child(6){min-width:260px}
-  .sel-pz{}
-  .pz-long,.pb-tp{color:var(--g)!important;border-color:var(--g)!important;background:rgba(34,197,94,.14)!important}
-  .pz-short,.pb-loss{color:var(--r)!important;border-color:var(--r)!important;background:rgba(239,68,68,.14)!important}
-  .pb-bu{color:#A8A29E!important;border-color:#A8A29E!important;background:rgba(168,162,158,.14)!important}
-
-  /* link chips (before / after) */
-  .edwrap{position:relative;display:inline-flex;align-items:center;gap:6px}
-  .chip{display:inline-block;padding:4px 10px;border-radius:999px;background:rgba(59,130,246,.15);
-    border:1px solid var(--blue);color:#93C5FD;text-decoration:none;font-size:12px;font-weight:600}
-  .chip:hover{background:rgba(59,130,246,.28)}
-  .ed{opacity:0;background:none;border:0;color:var(--gold);cursor:pointer;font-size:13px;transition:opacity .15s;padding:2px 4px}
-  .edwrap:hover .ed,.ed:focus{opacity:1}
-  .plus{background:none;border:1px dashed var(--line);color:var(--mut);border-radius:999px;padding:3px 10px;cursor:pointer;font-size:12px}
-  .plus:hover{color:var(--gold);border-color:var(--gold)}
-
-  /* argument pills */
-  .pills{display:flex;flex-wrap:wrap;gap:4px;align-items:center;min-width:240px}
-  .pill{display:inline-flex;align-items:center;gap:4px;padding:2px 4px 2px 9px;border-radius:999px;font-size:12px;
-    font-weight:600;color:var(--c);border:1px solid var(--c);background:color-mix(in srgb,var(--c) 16%,transparent)}
-  .pill .x{background:none;border:0;color:inherit;cursor:pointer;font-size:14px;line-height:1;padding:0 4px;opacity:.6}
-  .pill .x:hover{opacity:1}
-
-  /* comment */
-  .open{opacity:0;background:var(--gold);color:#111;border:0;border-radius:6px;padding:4px 8px;font-size:11px;font-weight:700;cursor:pointer;transition:opacity .15s}
-  tr:hover .open,.open:focus{opacity:1}
-  .del{background:none;border:0;color:var(--r);cursor:pointer;font-size:15px;opacity:.5}
-  .del:hover{opacity:1}
-  .actcol{width:40px}
-
-  /* infinite append button */
-  .addrow td{padding:0!important;border-bottom:0!important}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th,td{padding:6px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+  th{color:var(--mut);font-weight:600;background:#101016;position:sticky;top:0}
+  td input,td select{width:100%;min-width:90px}
+  td.comment input{min-width:180px}
+  tr.green td:first-child{box-shadow:inset 3px 0 0 var(--g)}
+  tr.red td:first-child{box-shadow:inset 3px 0 0 var(--r)}
+  .bal{color:var(--gold);font-weight:600}
+  .pos{color:var(--g)} .neg{color:var(--r)}
+  .del{background:none;border:0;color:var(--r);cursor:pointer;font-size:16px}
   .add{width:100%;padding:16px;border:1px dashed var(--gold);background:rgba(245,184,46,.06);
-    color:var(--gold);border-radius:0 0 14px 14px;font-weight:700;font-size:16px;cursor:pointer}
-  .add:hover{background:rgba(245,184,46,.14)}
-
-  /* side-peek drawer */
-  #scrim{position:fixed;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s;z-index:30}
-  #scrim.open{opacity:1;pointer-events:auto}
-  #drawer{position:fixed;top:0;right:0;height:100%;width:min(440px,100%);background:var(--card);
-    border-left:1px solid var(--line);transform:translateX(100%);transition:transform .25s;z-index:31;
-    display:flex;flex-direction:column;padding:18px;gap:10px}
-  #drawer.open{transform:none}
-  #drawer .dh{display:flex;justify-content:space-between;align-items:center;gap:10px}
-  #drawer h2{font-size:16px;margin:0}
-  #drawer .dm{color:var(--mut);font-size:13px}
-  #dText{flex:1;background:#0F0F15;color:var(--text);border:1px solid var(--line);border-radius:10px;padding:12px;resize:none;font:inherit;line-height:1.55}
-  #dText:focus{outline:1px solid var(--gold)}
+    color:var(--gold);border-radius:14px;font-weight:700;font-size:16px;cursor:pointer;margin-top:4px}
+  .add:hover{background:rgba(245,184,46,.12)}
+  .empty{color:var(--mut);text-align:center;padding:24px 0}
 </style>
 </head>
 <body>
 
+<!-- Shown only while the access check runs (prevents a paywall flash for buyers) -->
 <div id="boot">Yuklanmoqda…</div>
+
+<!-- Shown for 0.5 s right after a successful payment redirect -->
 <div id="confirmed" class="hidden">✅ To'lov tasdiqlandi</div>
 
-<!-- ============ PAYWALL ============ -->
+<!-- ============ PAYWALL (default for new visitors) ============ -->
 <section id="paywall" class="hidden">
   <div class="preview" aria-hidden="true">
-    <div class="pv-card"></div><div class="pv-card"></div>
+    <div class="pv-card"></div>
+    <div class="pv-card"></div>
     <div class="pv-chart"></div>
-    <div class="pv-card"></div><div class="pv-card"></div>
+    <div class="pv-card"></div>
+    <div class="pv-card"></div>
   </div>
+
   <div class="pw-card">
     <span class="badge">🔒 Cheklangan kirish</span>
     <h1>Trading Jurnali</h1>
     <p class="sub">Savdolaringizni intizom bilan boshqaring va natijangizni aniq ko'ring.</p>
+
     <ul class="features">
       <li>📈 Hissiyot liniyasi</li>
       <li>📊 Oylik foizli statistika</li>
       <li>♾️ Cheksiz savdo jadvali</li>
     </ul>
+
     <div class="price">$50 — Umrbod Kirish <small>(Lifetime Access)</small></div>
+
     <a id="btnCard" class="btn btn-card" href="#">💳 Karta orqali to'lash ($50)</a>
     <a id="btnCrypto" class="btn btn-crypto" href="#">🪙 Kripto (USDT) orqali to'lash ($50)</a>
   </div>
 </section>
 
-<!-- ============ JOURNAL ============ -->
+<!-- ============ TRADING JOURNAL (unlocked) ============ -->
 <section id="app" class="hidden">
   <header>
     <div style="display:flex;align-items:center;gap:10px">
       <h1>📒 Trading Jurnali</h1>
-      <span id="ownerTag" class="owner-tag hidden">OWNER</span>
+      <span id="ownerTag" class="admin-tag hidden">OWNER</span>
     </div>
     <div class="hdr-right">
       <label>Boshlang'ich balans ($):
@@ -200,237 +155,82 @@
   <div class="stats">
     <div class="stat"><div class="l">Jami savdo</div><div class="v" id="sTotal">0</div></div>
     <div class="stat"><div class="l">G'alaba (Winrate)</div><div class="v" id="sWin">0%</div></div>
-    <div class="stat"><div class="l">Jami foyda ($)</div><div class="v" id="sProfit">$0.00</div></div>
-    <div class="stat"><div class="l">Joriy balans ($)</div><div class="v" id="sBal">$0.00</div></div>
+    <div class="stat"><div class="l">Jami foyda ($)</div><div class="v" id="sProfit">0</div></div>
+    <div class="stat"><div class="l">Joriy balans ($)</div><div class="v" id="sBal">0</div></div>
     <div class="stat"><div class="l">Umumiy o'sish</div><div class="v" id="sRet">0%</div></div>
   </div>
 
   <div class="panel">
-    <h3>Balans liniyasi (🟢 Take Profit · 🔴 Loss · 🟤 BU)</h3>
-    <canvas id="chart1"></canvas>
-  </div>
-
-  <div class="panel">
-    <h3>Chart 2 — Hissiyot → natija (bosing: shu hissiyot bo'yicha filtr)</h3>
-    <canvas id="chart2"></canvas>
+    <h3>Balans va hissiyot liniyasi (🟢 yaxshi · 🔴 yomon · ⚪ neytral)</h3>
+    <canvas id="chart"></canvas>
   </div>
 
   <div class="panel">
     <h3>Oylik foizli statistika</h3>
     <div class="scroll">
-      <table class="mtable">
-        <thead><tr><th>Oy</th><th>Savdolar</th><th>G'alaba %</th><th>Foyda ($)</th><th>Foiz (%)</th></tr></thead>
+      <table>
+        <thead><tr><th>Oy</th><th>Savdolar</th><th>G'alaba %</th><th>Foyda ($)</th><th>Foiz (pribl %)</th></tr></thead>
         <tbody id="monthly"></tbody>
       </table>
     </div>
   </div>
 
-  <div class="panel" style="padding-bottom:0">
-    <div class="toolbar" id="filters">
-      <label class="flt">Pozitsiya
-        <select id="fPoz" class="sel-f" data-fk="poz"></select></label>
-      <label class="flt">Natija (pribl)
-        <select id="fPribl" class="sel-f" data-fk="pribl"></select></label>
-      <label class="flt">Hissiyot
-        <select id="fHiss" class="sel-f" data-fk="hiss"></select></label>
-      <label class="flt">Argument
-        <select id="fArg" class="sel-f" data-fk="arg"></select></label>
-      <label class="flt">Saralash
-        <select id="fSort" class="sel-f" data-fk="sort"></select></label>
-
-      <div class="wrapRel" style="align-self:flex-end">
-        <button id="colsBtn" class="ghost">Ustunlar (Properties)</button>
-        <div id="colsMenu" class="hidden"></div>
-      </div>
-      <button id="exportBtn" class="ghost" style="align-self:flex-end">JSON Yuklab olish (Backup)</button>
-      <label class="ghost upl" style="align-self:flex-end">JSON Yuklash
-        <input id="importInput" type="file" accept="application/json" hidden>
-      </label>
-    </div>
-
-    <div class="wrapTable">
-      <table id="jtable">
+  <div class="panel">
+    <h3>Savdolar jadvali</h3>
+    <div class="scroll">
+      <table>
         <thead>
           <tr>
-            <th data-col="0">Date time</th>
-            <th data-col="1">para</th>
-            <th data-col="2">pozitsiya</th>
-            <th data-col="3">before</th>
-            <th data-col="4">after</th>
-            <th data-col="5">argument</th>
-            <th data-col="6">Risk%</th>
-            <th data-col="7">R/R</th>
-            <th data-col="8">Foyda</th>
-            <th data-col="9">pribl</th>
-            <th data-col="10">Hissiyot</th>
-            <th data-col="11">comment</th>
-            <th class="actcol"></th>
+            <th>Date time</th><th>para</th><th>pozitsiya</th><th>before</th><th>after</th>
+            <th>argument</th><th>Risk%</th><th>R/R</th><th>Foyda ($)</th><th>pribl (%)</th>
+            <th>Balans ($)</th><th>Hissiyot</th><th>comment</th><th></th>
           </tr>
         </thead>
-        <tbody id="jt"></tbody>
+        <tbody id="journal"></tbody>
       </table>
+      <p id="emptyMsg" class="empty">Hali savdo yo'q. Pastdagi tugmani bosing.</p>
     </div>
   </div>
-</section>
 
-<!-- Notion-style side-peek drawer for comments -->
-<div id="scrim"></div>
-<aside id="drawer" aria-label="Izoh">
-  <div class="dh">
-    <h2 id="dTitle"></h2>
-    <button id="dClose" class="ghost">✕ Yopish</button>
-  </div>
-  <div class="dm" id="dMeta"></div>
-  <textarea id="dText" placeholder="Savdo izohi, sabab, xulosa…"></textarea>
-</aside>
+  <button id="addBtn" class="add">+ Yangi savdo qo'shish</button>
+</section>
 
 <script>
 /* =====================================================================
    CONFIG — EDIT ONLY THIS BLOCK
    ===================================================================== */
 const CONFIG = {
-  // 💳 Card checkout link
+  // 💳 Card checkout link (Lemon Squeezy / Gumroad / Stripe)
   CARD_PAYMENT_URL:   "https://YOUR-STORE.lemonsqueezy.com/checkout/buy/YOUR-VARIANT-ID",
-  // 🪙 USDT checkout link
+
+  // 🪙 USDT checkout link (Cryptomus / NOWPayments)
   CRYPTO_PAYMENT_URL: "https://nowpayments.io/payment/?iid=YOUR-INVOICE-ID",
 
-  // Gateway return URL: https://YOUR-SITE/?access=granted
+  // Gateway success redirect: ?<SUCCESS_PARAM>=<SUCCESS_VALUE>
   SUCCESS_PARAM: "access",
   SUCCESS_VALUE: "granted",
 
-  // Owner unlock: https://YOUR-SITE/?owner=alimov
+  // Owner unlock: https://yoursite.com/?owner=<OWNER_SECRET>
   OWNER_PARAM:  "owner",
   OWNER_SECRET: "alimov",
 
-  // Optional Cloudflare Worker that verifies payments. Leave "" to trust the redirect.
+  // Optional: Cloudflare Worker that verifies the payment before unlocking.
+  // Receives POST {params} and must reply {"valid": true} for a real payment.
+  // Leave "" to trust the redirect alone (see the note after the code).
   VERIFY_URL: "",
 
+  // Delay before the journal appears after payment confirmation (ms)
   UNLOCK_DELAY_MS: 500
 };
 /* ===================================================================== */
 
-/* ---------- Utilities ---------- */
-const $  = s => document.querySelector(s);
-const $$ = s => [...document.querySelectorAll(s)];
+const $ = s => document.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c =>
   ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const sleep = ms => new Promise(r => setTimeout(r, ms));
-const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-const nowLocal = () => {
-  const n = new Date(), p = v => String(v).padStart(2, "0");
-  return `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}T${p(n.getHours())}:${p(n.getMinutes())}`;
-};
-const fmtUSD = n => n == null ? "" : (n < 0 ? "-" : "") + "$" + Math.abs(n).toFixed(2);
-const parseMoney = s => { const v = parseFloat(String(s).replace(/[$,\s]/g, "")); return isNaN(v) ? null : v; };
-const fmtPct = n => n == null ? "" : `${n}%`;
-const parsePercent = s => { const v = parseFloat(String(s).replace(/[%\s]/g, "")); return isNaN(v) ? null : v; };
-const sanitizeUrl = u => !u ? "" : /^https?:\/\//i.test(u) ? u : "https://" + u;
-const sign = n => n == null || n === 0 ? "" : n > 0 ? "pos" : "neg";
-
-/* ---------- Constants ---------- */
-const DATA_KEY = "tj_data";
-const COLS = ["Date time","para","pozitsiya","before","after","argument",
-              "Risk%","R/R","Foyda","pribl","Hissiyot","comment"];
-const PARAS = ["btc usdt","bnb usdt","linkusdt","zec usdt","hype usdt"];
-const PRIBL = ["Take Profit","Loss","BU"];
-const DEFAULT_TAGS = [
-  {name:"SMC", color:"#3B82F6"},
-  {name:"Order block", color:"#A855F7"},
-  {name:"Order flow", color:"#14B8A6"}
-];
-const TAG_PALETTE = ["#F59E0B","#EC4899","#84CC16","#F97316","#06B6D4"];
-const DEFAULT_EMOTIONS = ["Xotirjam","Hursan","Reja bo'yicha","Shoshildim","FOMO","Asabiy","Qo'rquv"];
-const DEFAULT_FILTERS = {poz:"", pribl:"", hiss:"", arg:"", sort:"order"};
-
-/* ---------- State ---------- */
-const freshState = () => ({
-  startBal: 1000,
-  trades: [],
-  tags: DEFAULT_TAGS.map(t => ({...t})),
-  emotions: [...DEFAULT_EMOTIONS],
-  filters: {...DEFAULT_FILTERS},
-  cols: COLS.map(() => true)
-});
-let S = freshState();
-let editing = null;     // {id, f} while a before/after link is being edited
-let drawerId = null;
-let emoBoxes = [];      // clickable rows of Chart 2
-
-const find = id => S.trades.find(t => t.id === id);
-const tagColor = name => S.tags.find(t => t.name === name)?.color || "#8A8A99";
-const pzClass = p => p === "Short" ? "pz-short" : "pz-long";
-const priblClass = p => ({"Take Profit":"pb-tp","Loss":"pb-loss","BU":"pb-bu"})[p] || "";
-const priblColor = p => ({"Take Profit":"#22C55E","Loss":"#EF4444","BU":"#A8A29E"})[p] || "#8A8A99";
-
-const blankTrade = () => ({
-  id: uid(), dt: nowLocal(), para: PARAS[0], pozitsiya: "Long",
-  before: "", after: "", argument: [], risk: null, rr: "",
-  foyda: null, pribl: "", hissiyot: "Xotirjam", comment: ""
-});
-
-/* ---------- Sample data: 8 trades across Oct and Nov 2026 ---------- */
-function seedTrades() {
-  const rows = [
-    ["2026-10-06T09:15","btc usdt","Long", 1,"1:3", 30,"Take Profit","Reja bo'yicha",["SMC","Order block"],"HTF BOS, 4H OB retest"],
-    ["2026-10-09T14:40","bnb usdt","Short",2,"1:2",-20,"Loss","Shoshildim",["Order flow"],"Entered before confirmation"],
-    ["2026-10-14T11:05","linkusdt","Long", 1,"1:4", 40,"Take Profit","Xotirjam",["SMC"],"Clean liquidity sweep"],
-    ["2026-10-19T16:30","zec usdt","Short", 1,"1:3",  0,"BU","FOMO",["Order block"],"SL moved to BE after 1R"],
-    ["2026-11-02T10:20","hype usdt","Long",2,"1:3", 60,"Take Profit","Hursan",["Order flow","SMC"],"Pullback into demand"],
-    ["2026-11-05T08:50","btc usdt","Short",1,"1:2",-10,"Loss","Qo'rquv",["SMC"],"Closed early out of fear"],
-    ["2026-11-09T13:10","bnb usdt","Long", 1,"1:3", 34,"Take Profit","Asabiy",["Order block"],"Re-entry on displacement"],
-    ["2026-11-12T19:45","linkusdt","Long",2,"1:4",-20,"Loss","Reja bo'yicha",["SMC","Order flow"],"Stopped out on news spike"]
-  ];
-  return rows.map((r, i) => {
-    const [dt, para, pozitsiya, risk, rr, foyda, pribl, hissiyot, argument, comment] = r;
-    const sym = para.replace(/\s/g, "").toUpperCase();
-    return {
-      id: "seed" + i, dt, para, pozitsiya,
-      before: `https://www.tradingview.com/chart/?symbol=BINANCE:${sym}&interval=60`,
-      after:  `https://www.tradingview.com/chart/?symbol=BINANCE:${sym}&interval=15`,
-      argument, risk, rr, foyda, pribl, hissiyot, comment
-    };
-  });
-}
-
-/* ---------- Normalize loaded/imported data ---------- */
-function normalize(d) {
-  const base = freshState();
-  const trades = (Array.isArray(d.trades) ? d.trades : []).map(t => ({
-    ...blankTrade(), ...t, argument: Array.isArray(t.argument) ? t.argument : []
-  }));
-  const emotions = Array.isArray(d.emotions) && d.emotions.length ? [...d.emotions] : base.emotions;
-  const tags = Array.isArray(d.tags) && d.tags.length ? d.tags.map(t => ({...t})) : base.tags;
-  trades.forEach(t => {
-    if (t.hissiyot && !emotions.includes(t.hissiyot)) emotions.push(t.hissiyot);
-    t.argument.forEach(n => {
-      if (!tags.some(x => x.name === n))
-        tags.push({name: n, color: TAG_PALETTE[tags.length % TAG_PALETTE.length]});
-    });
-  });
-  return {
-    startBal: Number(d.startBal ?? base.startBal) || 0,
-    trades, tags, emotions,
-    filters: {...DEFAULT_FILTERS, ...(d.filters || {})},
-    cols: Array.isArray(d.cols) && d.cols.length === COLS.length ? d.cols : base.cols
-  };
-}
-
-/* ---------- Storage: LocalStorage + IndexedDB ---------- */
-function persist() {
-  try { localStorage.setItem(DATA_KEY, JSON.stringify(S)); } catch {}
-  idbSet(DATA_KEY, S);
-}
-async function loadData() {
-  let d = null;
-  try { d = JSON.parse(localStorage.getItem(DATA_KEY) || "null"); } catch {}
-  if (!d) d = await idbGet(DATA_KEY);
-  if (!d) d = {...freshState(), trades: seedTrades()};
-  S = normalize(d);
-  persist();
-}
 
 /* ================================================================
-   PAYWALL UNLOCK STATE (LocalStorage + IndexedDB)
+   PERSISTENT UNLOCK STATE  (LocalStorage + IndexedDB, both written)
    ================================================================ */
 const UNLOCK_KEY = "tj_unlock";
 
@@ -462,7 +262,7 @@ async function idbSet(key, value) {
       tx.oncomplete = resolve;
       tx.onerror = () => reject(tx.error);
     });
-  } catch {}
+  } catch { /* LocalStorage still holds the state */ }
 }
 async function idbDelete(key) {
   try {
@@ -470,6 +270,8 @@ async function idbDelete(key) {
     db.transaction("kv", "readwrite").objectStore("kv").delete(key);
   } catch {}
 }
+
+// Returns the saved unlock record from either store, or null
 async function readUnlock() {
   const ls = localStorage.getItem(UNLOCK_KEY);
   if (ls) { try { return JSON.parse(ls); } catch {} }
@@ -485,8 +287,11 @@ async function clearUnlock() {
   await idbDelete(UNLOCK_KEY);
 }
 
+/* ================================================================
+   PAYMENT VERIFICATION (optional server check)
+   ================================================================ */
 async function verifyPayment(params) {
-  if (!CONFIG.VERIFY_URL) return true;
+  if (!CONFIG.VERIFY_URL) return true;   // trust redirect when no Worker is set
   try {
     const r = await fetch(CONFIG.VERIFY_URL, {
       method: "POST",
@@ -499,39 +304,43 @@ async function verifyPayment(params) {
 }
 
 /* ================================================================
-   SCREENS + BOOT
+   SCREENS
    ================================================================ */
 function show(which) {
   $("#boot").classList.add("done");
   $("#paywall").classList.toggle("hidden", which !== "paywall");
   $("#app").classList.toggle("hidden", which !== "app");
 }
+
 function showApp(isOwner = false) {
   show("app");
   if (isOwner) $("#ownerTag").classList.remove("hidden");
-  syncAll();
+  renderAll();
 }
 
+/* ================================================================
+   BOOT — decides what the visitor sees
+   ================================================================ */
 async function boot() {
   $("#btnCard").href = CONFIG.CARD_PAYMENT_URL;
   $("#btnCrypto").href = CONFIG.CRYPTO_PAYMENT_URL;
-
-  await loadData();
 
   const p = new URLSearchParams(location.search);
   const hasOwner   = p.get(CONFIG.OWNER_PARAM) !== null;
   const hasSuccess = p.get(CONFIG.SUCCESS_PARAM) === CONFIG.SUCCESS_VALUE;
 
-  // Remove unlock parameters from the address bar immediately
-  if (hasOwner || hasSuccess) history.replaceState({}, "", location.pathname);
+  // Always remove the unlock parameters from the address bar right away
+  if (hasOwner || hasSuccess || p.has("payment")) {
+    history.replaceState({}, "", location.pathname);
+  }
 
-  // Owner unlock
+  // 1) Owner: unlock this browser permanently
   if (hasOwner && p.get(CONFIG.OWNER_PARAM) === CONFIG.OWNER_SECRET) {
     await saveUnlock("owner");
     return showApp(true);
   }
 
-  // Buyer returned from payment gateway
+  // 2) Buyer returned from the payment gateway
   if (hasSuccess) {
     const ok = await verifyPayment(Object.fromEntries(p));
     if (ok) {
@@ -542,15 +351,18 @@ async function boot() {
       $("#confirmed").classList.add("hidden");
       return showApp(false);
     }
+    // Verification failed: fall through to the paywall
   }
 
-  // Returning buyer or owner
+  // 3) Returning buyer or owner already unlocked in this browser
   const rec = await readUnlock();
   if (rec && rec.unlocked) {
-    await saveUnlock(rec.via || "payment");   // keep both stores in sync
+    // Re-save so both stores stay in sync if one was cleared
+    await saveUnlock(rec.via || "payment");
     return showApp(rec.via === "owner");
   }
 
+  // 4) New visitor
   show("paywall");
 }
 
@@ -561,193 +373,101 @@ $("#logoutBtn").onclick = async () => {
 };
 
 /* ================================================================
-   JOURNAL RENDERING
+   TRADING JOURNAL
    ================================================================ */
-function sel(t, f, opts, cls = "", allowNew = false, blank = null) {
-  const list = t[f] && !opts.includes(t[f]) ? [...opts, t[f]] : opts;
-  let h = `<select class="sel ${cls}" data-id="${t.id}" data-f="${f}">`;
-  if (blank !== null) h += `<option value="">${esc(blank)}</option>`;
-  h += list.map(o => `<option value="${esc(o)}"${o === t[f] ? " selected" : ""}>${esc(o)}</option>`).join("");
-  if (allowNew) h += `<option value="__new__">＋ Yangi…</option>`;
-  return h + "</select>";
-}
+let trades = JSON.parse(localStorage.getItem("tj_trades") || "[]");
+const saveTrades = () => localStorage.setItem("tj_trades", JSON.stringify(trades));
 
-function cellDT(t)   { return `<input type="datetime-local" data-id="${t.id}" data-f="dt" value="${esc(t.dt)}">`; }
-function cellPara(t) { return sel(t, "para", PARAS, "", true); }
-function cellPoz(t)  { return sel(t, "pozitsiya", ["Long","Short"], pzClass(t.pozitsiya)); }
-
-function cellLink(t, f) {
-  if (editing && editing.id === t.id && editing.f === f) {
-    return `<input type="url" data-id="${t.id}" data-edit="${f}" value="${esc(t[f])}" placeholder="https://www.tradingview.com/…">`;
-  }
-  if (!t[f]) return `<button class="plus" data-id="${t.id}" data-start="${f}">＋ link</button>`;
-  return `<span class="edwrap">
-      <a class="chip" href="${esc(t[f])}" target="_blank" rel="noopener">TradingView ↗</a>
-      <button class="ed" data-id="${t.id}" data-start="${f}" title="Tahrirlash">✎</button>
-    </span>`;
-}
-
-function cellArg(t) {
-  const pills = t.argument.map(n =>
-    `<span class="pill" style="--c:${tagColor(n)}">${esc(n)}<button class="x" data-id="${t.id}" data-rmtag="${esc(n)}" title="Olib tashlash">×</button></span>`
-  ).join("");
-  return `<div class="pills">${pills}<button class="plus" data-addtag="${t.id}" title="Teg qo'shish">＋</button></div>`;
-}
-
-function cellRisk(t)  { return `<input class="narrow" type="text" inputmode="decimal" data-id="${t.id}" data-f="risk" value="${esc(fmtPct(t.risk))}" placeholder="1%">`; }
-function cellRR(t)    { return `<input class="narrow" type="text" data-id="${t.id}" data-f="rr" value="${esc(t.rr)}" placeholder="1:3">`; }
-function cellFoyda(t) { return `<input class="narrow ${sign(t.foyda)}" type="text" data-id="${t.id}" data-f="foyda" value="${esc(fmtUSD(t.foyda))}" placeholder="$0.00">`; }
-function cellPribl(t) { return sel(t, "pribl", PRIBL, priblClass(t.pribl), false, "—"); }
-function cellHiss(t)  { return sel(t, "hissiyot", S.emotions, "", true); }
-function cellComment(t) {
-  return `<span class="edwrap">
-      <input class="wide" type="text" data-id="${t.id}" data-f="comment" value="${esc(t.comment)}" placeholder="izoh…">
-      <button class="open" data-open="${t.id}">OPEN</button>
-    </span>`;
-}
-
-function rowHTML(t) {
-  const cells = [
-    cellDT(t), cellPara(t), cellPoz(t), cellLink(t, "before"), cellLink(t, "after"),
-    cellArg(t), cellRisk(t), cellRR(t), cellFoyda(t), cellPribl(t), cellHiss(t), cellComment(t)
-  ];
-  return `<tr data-row="${t.id}">` +
-    cells.map((c, i) => `<td data-col="${i}">${c}</td>`).join("") +
-    `<td class="actcol"><button class="del" data-del="${t.id}" title="O'chirish">✕</button></td></tr>`;
-}
-
-function visibleTrades() {
-  const f = S.filters;
-  let list = S.trades.filter(t =>
-    (!f.poz    || t.pozitsiya === f.poz) &&
-    (!f.pribl  || t.pribl === f.pribl) &&
-    (!f.hiss   || t.hissiyot === f.hiss) &&
-    (!f.arg    || t.argument.includes(f.arg)));
-  const sorters = {
-    "dt-asc":   (a, b) => a.dt.localeCompare(b.dt),
-    "dt-desc":  (a, b) => b.dt.localeCompare(a.dt),
-    "pnl-desc": (a, b) => (b.foyda ?? 0) - (a.foyda ?? 0),
-    "pnl-asc":  (a, b) => (a.foyda ?? 0) - (b.foyda ?? 0)
+function newTrade() {
+  const n = new Date(), p = v => String(v).padStart(2, "0");
+  return {
+    id: String(Date.now()) + Math.random().toString(36).slice(2, 6),
+    dt: `${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}T${p(n.getHours())}:${p(n.getMinutes())}`,
+    para: "", pozitsiya: "Long", before: "", after: "", argument: "",
+    risk: "", rr: "", foyda: "", pribl: "", hissiyot: "green", comment: ""
   };
-  if (sorters[f.sort]) list = [...list].sort(sorters[f.sort]);
-  return list;
 }
+
+const TEXT_COLS = [
+  ["dt","datetime-local"],["para","text"],["pozitsiya","text"],["before","url"],
+  ["after","url"],["argument","text"],["risk","number"],["rr","text"],
+  ["foyda","number"],["pribl","number"]
+];
 
 function renderTable() {
-  const list = visibleTrades();
-  let html = list.map(rowHTML).join("");
-  if (!S.trades.length)
-    html += `<tr><td colspan="13" class="empty">Hali savdo yo'q.</td></tr>`;
-  else if (!list.length)
-    html += `<tr><td colspan="13" class="empty">Filtr bo'yicha savdo topilmadi.</td></tr>`;
-  // Infinite bottom-append button, attached to the last row
-  html += `<tr class="addrow"><td colspan="13"><button id="addBtn" class="add">+ Yangi savdo qo'shish</button></td></tr>`;
-  $("#jt").innerHTML = html;
-  applyCols();
-  if (editing) {
-    const ei = $("#jt").querySelector(`[data-edit="${editing.f}"][data-id="${editing.id}"]`);
-    ei?.focus(); ei?.select();
-  }
+  const tb = $("#journal");
+  $("#emptyMsg").classList.toggle("hidden", trades.length > 0);
+  tb.innerHTML = trades.map(t => {
+    const cells = TEXT_COLS.map(([f, type]) =>
+      `<td><input data-id="${t.id}" data-f="${f}" type="${type}" value="${esc(t[f])}"${type==="number"?' step="any"':''}></td>`
+    ).join("");
+    return `<tr class="${t.hissiyot}">
+      ${cells}
+      <td><span class="bal" data-bal="${t.id}"></span></td>
+      <td><select data-id="${t.id}" data-f="hissiyot">
+        <option value="green"${t.hissiyot==="green"?" selected":""}>🟢 Yaxshi</option>
+        <option value="red"${t.hissiyot==="red"?" selected":""}>🔴 Yomon</option>
+        <option value="neutral"${t.hissiyot==="neutral"?" selected":""}>⚪ Neytral</option>
+      </select></td>
+      <td class="comment"><input data-id="${t.id}" data-f="comment" type="text" value="${esc(t.comment)}"></td>
+      <td><button class="del" data-del="${t.id}" title="O'chirish">✕</button></td>
+    </tr>`;
+  }).join("");
 }
 
-function applyCols() {
-  $$("#jtable [data-col]").forEach(el => {
-    el.style.display = S.cols[+el.dataset.col] ? "" : "none";
+function renderStats() {
+  const start = parseFloat($("#startBal").value) || 0;
+  let bal = start, wins = 0, counted = 0, profit = 0;
+  const pts = [{b: start, h: "neutral"}];
+
+  trades.forEach(t => {
+    const f = parseFloat(t.foyda);
+    if (!isNaN(f)) { bal += f; profit += f; counted++; if (f > 0) wins++; }
+    pts.push({b: bal, h: t.hissiyot});
+    const cell = document.querySelector(`[data-bal="${t.id}"]`);
+    if (cell) cell.textContent = bal.toFixed(2);
   });
-}
 
-function buildColsMenu() {
-  $("#colsMenu").innerHTML = COLS.map((c, i) =>
-    `<label class="colchk"><input type="checkbox" data-ci="${i}" ${S.cols[i] ? "checked" : ""}> ${esc(c)}</label>`
-  ).join("");
-}
-
-function fillSel(id, opts, val) {
-  const el = $(id);
-  el.innerHTML = opts.map(([v, l]) => `<option value="${esc(v)}">${esc(l)}</option>`).join("");
-  el.value = val;
-}
-function syncFilters() {
-  const f = S.filters;
-  fillSel("#fPoz",   [["","Barcha pozitsiya"],["Long","Long"],["Short","Short"]], f.poz);
-  fillSel("#fPribl", [["","Barcha natija"], ...PRIBL.map(x => [x, x])], f.pribl);
-  fillSel("#fHiss",  [["","Barcha hissiyot"], ...S.emotions.map(x => [x, x])], f.hiss);
-  fillSel("#fArg",   [["","Barcha argument"], ...S.tags.map(x => [x.name, x.name])], f.arg);
-  fillSel("#fSort",  [["order","Tartib (qo'shilgan)"],["dt-asc","Sana ↑"],["dt-desc","Sana ↓"],
-                      ["pnl-desc","Foyda ↓"],["pnl-asc","Foyda ↑"]], f.sort);
-}
-
-/* ================================================================
-   STATS, MONTHLY TABLE, CHARTS
-   ================================================================ */
-function computeStats() {
-  const start = Number(S.startBal) || 0;
-  let bal = start, profit = 0, wins = 0, counted = 0;
-  const pts = [{b: start, c: null}];
-  S.trades.forEach(t => {
-    if (t.foyda != null) { bal += t.foyda; profit += t.foyda; counted++; if (t.foyda > 0) wins++; }
-    pts.push({b: bal, c: priblColor(t.pribl)});
-  });
-  return {start, bal, profit, wins, counted, pts};
-}
-
-function refreshStats() {
-  const st = computeStats();
-  $("#sTotal").textContent = S.trades.length;
-  $("#sWin").textContent = (st.counted ? (st.wins / st.counted * 100).toFixed(1) : "0") + "%";
-  $("#sProfit").textContent = fmtUSD(st.profit);
-  $("#sProfit").className = "v " + sign(st.profit);
-  $("#sBal").textContent = "$" + st.bal.toFixed(2);
-  const ret = st.start ? (st.bal - st.start) / st.start * 100 : 0;
+  $("#sTotal").textContent = trades.length;
+  $("#sWin").textContent = (counted ? (wins / counted * 100).toFixed(1) : "0") + "%";
+  $("#sProfit").textContent = profit.toFixed(2);
+  $("#sProfit").className = "v " + (profit >= 0 ? "pos" : "neg");
+  $("#sBal").textContent = bal.toFixed(2);
+  const ret = start ? (bal - start) / start * 100 : 0;
   $("#sRet").textContent = ret.toFixed(2) + "%";
-  $("#sRet").className = "v " + sign(ret);
-  renderMonthly();
-  drawBalance(st.pts);
-  drawEmotions();
-}
+  $("#sRet").className = "v " + (ret >= 0 ? "pos" : "neg");
 
-function renderMonthly() {
+  // Monthly report
   const m = {};
-  S.trades.forEach(t => {
+  trades.forEach(t => {
     const k = (t.dt || "").slice(0, 7) || "—";
-    m[k] ??= {n: 0, w: 0, c: 0, f: 0};
-    const r = m[k];
-    r.n++;
-    if (t.foyda != null) { r.c++; r.f += t.foyda; if (t.foyda > 0) r.w++; }
+    m[k] ??= {n: 0, w: 0, c: 0, p: 0, f: 0};
+    const f = parseFloat(t.foyda), pr = parseFloat(t.pribl);
+    m[k].n++;
+    if (!isNaN(f)) { m[k].c++; m[k].f += f; if (f > 0) m[k].w++; }
+    if (!isNaN(pr)) m[k].p += pr;
   });
-  const keys = Object.keys(m).sort();
-  let running = Number(S.startBal) || 0;
-  const pct = {};
-  keys.forEach(k => {               // month return relative to the balance at its start
-    const start = running;
-    running += m[k].f;
-    pct[k] = start ? m[k].f / start * 100 : 0;
-  });
-  $("#monthly").innerHTML = keys.reverse().map(k => {
+  $("#monthly").innerHTML = Object.keys(m).sort().reverse().map(k => {
     const r = m[k];
     const wr = r.c ? (r.w / r.c * 100).toFixed(1) : "0.0";
     return `<tr>
       <td>${k}</td><td>${r.n}</td><td>${wr}%</td>
-      <td class="${sign(r.f)}">${fmtUSD(r.f)}</td>
-      <td class="${sign(pct[k])}">${pct[k].toFixed(2)}%</td>
+      <td class="${r.f>=0?'pos':'neg'}">${r.f.toFixed(2)}</td>
+      <td class="${r.p>=0?'pos':'neg'}">${r.p.toFixed(2)}%</td>
     </tr>`;
   }).join("") || `<tr><td colspan="5" class="empty">Ma'lumot yo'q</td></tr>`;
+
+  drawChart(pts);
 }
 
-function fitCanvas(c, h) {
-  const dpr = window.devicePixelRatio || 1;
-  const w = c.clientWidth;
+function drawChart(pts) {
+  const c = $("#chart"), dpr = window.devicePixelRatio || 1;
+  const w = c.clientWidth, h = 220;
   c.width = w * dpr; c.height = h * dpr;
-  c.style.height = h + "px";
   const x = c.getContext("2d");
   x.setTransform(dpr, 0, 0, dpr, 0, 0);
   x.clearRect(0, 0, w, h);
-  return {x, w};
-}
 
-function drawBalance(pts) {
-  const h = 220;
-  const {x, w} = fitCanvas($("#chart1"), h);
   if (pts.length < 2) {
     x.fillStyle = "#8A8A99"; x.font = "14px system-ui";
     x.fillText("Savdo qo'shing — balans grafigi shu yerda chiziladi", 16, h / 2);
@@ -767,8 +487,7 @@ function drawBalance(pts) {
   x.stroke();
 
   pts.forEach((p, i) => {
-    if (!i) return;
-    x.fillStyle = p.c;
+    x.fillStyle = p.h === "green" ? "#22C55E" : p.h === "red" ? "#EF4444" : "#8A8A99";
     x.beginPath(); x.arc(X(i), Y(p.b), 4.5, 0, Math.PI * 2); x.fill();
   });
 
@@ -777,268 +496,46 @@ function drawBalance(pts) {
   x.fillText(min.toFixed(0), 4, h - P);
 }
 
-function drawEmotions() {
-  const rows = S.emotions;
-  const rowH = 32, labelW = 130;
-  const h = rows.length * rowH + 12;
-  const {x, w} = fitCanvas($("#chart2"), h);
-  const counts = rows.map(n => S.trades.filter(t => t.hissiyot === n).length);
-  const maxC = Math.max(1, ...counts);
-  const barArea = Math.max(60, w - labelW - 170);
-  emoBoxes = [];
-
-  rows.forEach((name, i) => {
-    const list = S.trades.filter(t => t.hissiyot === name);
-    const sum = list.reduce((s, t) => s + (t.foyda || 0), 0);
-    const y = 6 + i * rowH;
-    const bw = Math.max(2, barArea * (list.length / maxC));
-    const active = S.filters.hiss === name;
-
-    x.fillStyle = active ? "#F5B82E" : "#EDEDF2";
-    x.font = (active ? "700 " : "") + "13px system-ui";
-    x.fillText(name, 8, y + 17);
-
-    x.fillStyle = sum >= 0 ? "#22C55E" : "#EF4444";
-    x.globalAlpha = list.length ? 0.85 : 0.15;
-    x.fillRect(labelW, y + 6, list.length ? bw : 2, 18);
-    x.globalAlpha = 1;
-
-    x.fillStyle = "#8A8A99"; x.font = "12px system-ui";
-    x.fillText(`${list.length} ta · ${fmtUSD(sum)}`, labelW + bw + 8, y + 19);
-    emoBoxes.push({name, y, h: rowH});
-  });
+function renderAll() {
+  renderTable();
+  renderStats();
 }
 
-/* ================================================================
-   FILTERS / COLUMNS / BACKUP
-   ================================================================ */
-$("#filters").addEventListener("change", e => {
-  const k = e.target.dataset.fk;
-  if (!k) return;
-  S.filters[k] = e.target.value;
-  persist();
-  renderTable();
+/* ---------- EVENTS (delegated, no focus loss) ---------- */
+$("#journal").addEventListener("input", e => {
+  const el = e.target, id = el.dataset.id, f = el.dataset.f;
+  if (!id || !f) return;
+  const t = trades.find(x => x.id === id);
+  if (!t) return;
+  t[f] = el.value;
+  if (f === "hissiyot") el.closest("tr").className = el.value;
+  saveTrades();
+  renderStats();
+});
+$("#journal").addEventListener("change", e => e.target.dispatchEvent(new Event("input", {bubbles: true})));
+$("#journal").addEventListener("click", e => {
+  const id = e.target.dataset.del;
+  if (!id) return;
+  if (!confirm("Bu savdoni o'chirasizmi?")) return;
+  trades = trades.filter(t => t.id !== id);
+  saveTrades(); renderAll();
 });
 
-$("#colsBtn").onclick = e => { e.stopPropagation(); $("#colsMenu").classList.toggle("hidden"); };
-document.addEventListener("click", e => {
-  if (!e.target.closest(".wrapRel")) $("#colsMenu").classList.add("hidden");
-});
-$("#colsMenu").addEventListener("change", e => {
-  const i = e.target.dataset.ci;
-  if (i == null) return;
-  S.cols[+i] = e.target.checked;
-  persist();
-  applyCols();
-});
-
-$("#exportBtn").onclick = () => {
-  const payload = {app: "trading-journal", version: 2, exportedAt: new Date().toISOString(), ...S};
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type: "application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `trading-journal-${new Date().toISOString().slice(0, 10)}.json`;
-  a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+$("#addBtn").onclick = () => {
+  trades.push(newTrade());
+  saveTrades(); renderAll();
+  const last = $("#journal").lastElementChild;
+  last?.scrollIntoView({behavior: "smooth", block: "center"});
+  last?.querySelector("input")?.focus();
 };
 
-$("#importInput").addEventListener("change", e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = () => {
-    try {
-      const d = JSON.parse(reader.result);
-      if (!Array.isArray(d.trades)) throw new Error("bad");
-      if (!confirm(`${d.trades.length} ta savdo yuklansinmi? Joriy ma'lumotlar almashtiriladi.`)) return;
-      S = normalize(d);
-      persist();
-      syncAll();
-    } catch {
-      alert("Fayl noto'g'ri formatda.");
-    } finally {
-      e.target.value = "";
-    }
-  };
-  reader.readAsText(file);
-});
-
-/* ================================================================
-   TABLE INTERACTIONS (delegated, so focus is never lost)
-   ================================================================ */
-const jt = $("#jt");
-
-// Live typing: update the data and stats, but do not re-render the row
-function applyField(el) {
-  const t = find(el.dataset.id), f = el.dataset.f;
-  if (!t || !f) return;
-  if (f === "risk")      t.risk  = parsePercent(el.value);
-  else if (f === "foyda") t.foyda = parseMoney(el.value);
-  else t[f] = el.value;
-}
-
-jt.addEventListener("input", e => {
-  const el = e.target;
-  if (el.tagName === "SELECT" || el.dataset.edit || !el.dataset.f) return;
-  applyField(el);
-  persist();
-  refreshStats();
-});
-
-// Selects, and text fields on blur
-jt.addEventListener("change", e => {
-  const el = e.target, f = el.dataset.f;
-  if (!el.dataset.id || !f) return;
-  const t = find(el.dataset.id);
-  if (!t) return;
-
-  if (el.value === "__new__") {
-    const hint = f === "para" ? "Yangi juftlik nomi (masalan: ada usdt)" : "Yangi hissiyot nomi (masalan: Ishonch)";
-    const name = (prompt(hint) || "").trim();
-    if (!name) { renderTable(); return; }
-    if (f === "hissiyot" && !S.emotions.includes(name)) S.emotions.push(name);
-    t[f] = name;
-    persist(); renderTable(); refreshStats(); syncFilters();
-    return;
-  }
-
-  applyField(el);
-  if (f === "pozitsiya") el.className = "sel " + pzClass(t.pozitsiya);
-  if (f === "pribl")     el.className = "sel " + priblClass(t.pribl);
-  if (f === "risk")      el.value = fmtPct(t.risk);
-  if (f === "foyda")   { el.value = fmtUSD(t.foyda); el.className = "narrow " + sign(t.foyda); }
-  if (f === "hissiyot") syncFilters();
-  persist();
-  refreshStats();
-});
-
-// Inline link editing (before / after)
-jt.addEventListener("focusout", e => {
-  const el = e.target;
-  if (!el.dataset.edit) return;
-  const t = find(el.dataset.id);
-  if (t && !el.dataset.cancel) {
-    t[el.dataset.edit] = sanitizeUrl(el.value.trim());
-    persist();
-  }
-  editing = null;
-  renderTable();
-});
-jt.addEventListener("keydown", e => {
-  const el = e.target;
-  if (!el.dataset.edit) return;
-  if (e.key === "Enter") el.blur();
-  if (e.key === "Escape") { el.dataset.cancel = "1"; el.blur(); }
-});
-
-jt.addEventListener("click", e => {
-  const b = e.target.closest("button");
-  if (!b) return;
-
-  if (b.id === "addBtn") return addTrade();
-
-  if (b.dataset.del) {
-    if (!confirm("Bu savdoni o'chirasizmi?")) return;
-    S.trades = S.trades.filter(t => t.id !== b.dataset.del);
-    persist(); renderTable(); refreshStats();
-    return;
-  }
-  if (b.dataset.open) return openDrawer(b.dataset.open);
-  if (b.dataset.start) {
-    editing = {id: b.dataset.id, f: b.dataset.start};
-    return renderTable();
-  }
-  if (b.dataset.addtag) return addTag(b.dataset.addtag);
-  if (b.dataset.rmtag && b.dataset.id) {
-    const t = find(b.dataset.id);
-    if (t) t.argument = t.argument.filter(n => n !== b.dataset.rmtag);
-    persist(); renderTable();
-  }
-});
-
-// Chart 2 click: filter the table by that hissiyot
-$("#chart2").addEventListener("click", e => {
-  const r = e.currentTarget.getBoundingClientRect();
-  const y = e.clientY - r.top;
-  const box = emoBoxes.find(b => y >= b.y && y < b.y + b.h);
-  if (!box) return;
-  S.filters.hiss = S.filters.hiss === box.name ? "" : box.name;
-  persist(); syncFilters(); renderTable(); drawEmotions();
-});
-
-/* ---------- Add trade (infinite bottom-append) ---------- */
-function addTrade() {
-  const t = blankTrade();
-  S.trades.push(t);
-  S.filters = {...DEFAULT_FILTERS};   // so the new row is visible
-  persist(); syncFilters(); renderTable(); refreshStats();
-  const row = jt.querySelector(`[data-row="${t.id}"]`);
-  row?.scrollIntoView({behavior: "smooth", block: "center"});
-  row?.querySelector('[data-f="dt"]')?.focus();
-}
-
-/* ---------- Custom argument tags ---------- */
-function addTag(id) {
-  const t = find(id);
-  if (!t) return;
-  const name = (prompt("Argument tegi nomi (yangi yoki mavjud):") || "").trim();
-  if (!name) return;
-  let tag = S.tags.find(x => x.name.toLowerCase() === name.toLowerCase());
-  if (!tag) {
-    tag = {name, color: TAG_PALETTE[S.tags.length % TAG_PALETTE.length]};
-    S.tags.push(tag);
-  }
-  if (!t.argument.includes(tag.name)) t.argument.push(tag.name);
-  persist(); syncFilters(); renderTable();
-}
-
-/* ---------- Comment drawer (Notion-style side-peek) ---------- */
-function openDrawer(id) {
-  const t = find(id);
-  if (!t) return;
-  drawerId = id;
-  $("#dTitle").textContent = `${t.para} · ${t.pozitsiya} · ${t.dt.replace("T", " ")}`;
-  $("#dMeta").textContent = `${t.hissiyot} · ${t.foyda == null ? "—" : fmtUSD(t.foyda)} · ${t.pribl || "—"}`;
-  $("#dText").value = t.comment || "";
-  $("#drawer").classList.add("open");
-  $("#scrim").classList.add("open");
-  setTimeout(() => $("#dText").focus(), 250);
-}
-function closeDrawer() {
-  drawerId = null;
-  $("#drawer").classList.remove("open");
-  $("#scrim").classList.remove("open");
-}
-$("#dClose").onclick = closeDrawer;
-$("#scrim").onclick = closeDrawer;
-document.addEventListener("keydown", e => { if (e.key === "Escape") closeDrawer(); });
-$("#dText").addEventListener("input", e => {
-  const t = find(drawerId);
-  if (!t) return;
-  t.comment = e.target.value;
-  persist();
-  const inp = jt.querySelector(`[data-id="${drawerId}"][data-f="comment"]`);
-  if (inp) inp.value = t.comment;
-});
-
-/* ---------- Start balance ---------- */
+const savedStart = localStorage.getItem("tj_start");
+if (savedStart !== null) $("#startBal").value = savedStart;
 $("#startBal").addEventListener("input", e => {
-  S.startBal = parseFloat(e.target.value) || 0;
-  persist();
-  refreshStats();
+  localStorage.setItem("tj_start", e.target.value);
+  renderStats();
 });
-
-window.addEventListener("resize", () => {
-  if (!$("#app").classList.contains("hidden")) refreshStats();
-});
-
-function syncAll() {
-  $("#startBal").value = S.startBal;
-  buildColsMenu();
-  syncFilters();
-  renderTable();
-  refreshStats();
-}
+window.addEventListener("resize", renderStats);
 
 /* ---------- START ---------- */
 boot();
