@@ -62,7 +62,6 @@ button.S{background:var(--r);color:#fff}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9}
 .modal .card{max-width:380px;width:100%;margin:0}
 .hidden{display:none!important}
-.err{color:var(--r);font-size:12px;min-height:16px}
 .cv{background:#22c55e;border:0;border-radius:6px;padding:4px 6px;color:#04110b;font-size:13px;line-height:1;cursor:pointer;transition:filter .15s}
 .cv:hover{filter:brightness(1.15)}
 .cmp{position:fixed;inset:0;width:100vw;height:100vh;z-index:9999;background:var(--bg);display:flex;flex-direction:column}
@@ -87,17 +86,35 @@ button.S{background:var(--r);color:#fff}
 .pane.act .plabel{border-color:var(--acc)}
 .cnote{position:absolute;left:8px;right:8px;bottom:44px;z-index:2;font-size:11px;color:var(--mut);background:var(--input);border:1px solid var(--line);padding:4px 6px;border-radius:8px}
 @media (max-width:700px){.cmp-body{grid-template-columns:1fr 1fr}.pane{border-right:1px solid var(--line)}}
+.err{color:var(--r);font-size:12px;min-height:16px}
+.modal .pay{max-width:420px;width:100%;margin:0;text-align:center;padding:24px}
+.pay-badge{display:inline-block;background:var(--g);color:#04110b;font-weight:700;font-size:12px;padding:3px 10px;border-radius:999px;margin-bottom:10px}
+.pay-title{font-size:20px;margin:0 0 8px}
+.pay-sub{color:var(--mut);font-size:13px;margin:0 0 18px}
+.pay-btn{width:100%;background:var(--g);color:#04110b;border:0;border-radius:12px;padding:18px 14px;font-size:17px;font-weight:700;box-shadow:0 8px 24px rgba(22,199,132,.35);cursor:pointer}
+.pay-btn:hover{filter:brightness(1.08)}
+.pay-fine{color:var(--mut);font-size:12px;margin:12px 0 0}
+.pay-backup{margin-top:18px;font-size:12px}
+.pay-backup a{color:var(--mut);text-decoration:underline;cursor:pointer}
+.pay-backup #backupBox{margin-top:10px}
 </style></head>
 <body>
 
-<div id="gate" class="modal hidden"><div class="card">
-  <h1 data-i="title" style="font-size:18px;margin:0 0 6px"></h1>
-  <div class="sub" data-i="gateSub"></div>
-  <a id="buy" class="link" data-i="buy" style="display:inline-block;padding:8px 12px;background:var(--acc);color:#fff;border-color:var(--acc)" target="_blank" rel="noopener"></a>
-  <div class="sub" style="margin-top:10px"><span data-i="questions"></span> <a id="tg" class="link" data-i="tg" style="padding:2px 6px" target="_blank" rel="noopener"></a></div>
-  <div class="bar" style="margin-top:12px"><input id="lic" data-ph="lic" style="flex:1"><button class="p" id="unlock" data-i="unlock"></button></div>
-  <div id="gerr" class="err"></div>
+<div id="gate" class="modal hidden"><div class="card pay">
+  <div class="pay-badge">PRO</div>
+  <h1 class="pay-title">Behruz Crypto Pro Journal — Pro Access ($50)</h1>
+  <p class="pay-sub">Full access to the journal: trade logging, USD P&amp;L, chart comparison, and the monthly AI audit. One-time payment.</p>
+  <button id="payBtn" class="pay-btn">Pay $50 via Card or Crypto (Instant Access) ↗</button>
+  <p class="pay-fine">Access unlocks automatically when you return from payment.</p>
+  <div class="pay-backup">
+    <a id="backupToggle">Already paid? Enter backup code</a>
+    <div id="backupBox" class="hidden">
+      <div class="bar"><input id="lic" placeholder="Backup code" style="flex:1"><button class="p" id="unlock">Unlock</button></div>
+      <div id="gerr" class="err"></div>
+    </div>
+  </div>
 </div></div>
+
 
 <div class="bar" style="justify-content:space-between;align-items:flex-start">
   <div><h1 data-i="title"></h1><div class="sub" data-i="sub"></div></div>
@@ -132,11 +149,9 @@ button.S{background:var(--r);color:#fff}
 </div>
 
 <script>
-/* ===== CONFIG (replace before publishing; visible to anyone who views the page source) ===== */
+/* ===== CONFIG (move to env in production) ===== */
 const CONFIG = {
   VIP_KEY: 'behruz-vip',
-  LICENSE_KEYS: ['PRO-7K2M-9QXD', 'PRO-3HFT-8LWA'],
-  CHECKOUT_URL: 'https://example.com/checkout',
   TELEGRAM: 'https://t.me/yourhandle'
 };
 
@@ -254,7 +269,7 @@ function save() {
 
 /* ===== USD calculations ===== */
 const r2 = x => Math.round(x * 100) / 100;
-// Risk-based: risk $ = balance x risk%; TP = +risk$ x R:R; SL = -risk$; a manual $ override wins
+// Risk-based: risk $ = balance x risk% ; TP = +risk$ x R:R ; SL = -risk$ ; manual $ override wins
 function pnl(t) {
   if (t.override !== null && t.override !== undefined && t.override !== '') return r2(+t.override);
   const riskUSD = BALANCE * (t.risk || 0) / 100;
@@ -266,7 +281,7 @@ const fmt = x => {
   const s = Math.abs(x).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
   return (x > 0 ? '+' : x < 0 ? '-' : '') + '$' + s;
 };
-// Accepts "+$150", "-50", "1,200.5"; empty = clear the manual override
+// Accepts "+$150", "-50", "1,200.5", or empty (empty = clear the manual override)
 const parseUSD = s => { const v = String(s ?? '').replace(/[$,\s]/g, '').replace(/^\+/, ''); return v === '' || isNaN(+v) ? null : r2(+v); };
 const sortTrades = a => a.sort((x, y) => x.date.localeCompare(y.date) || x.id - y.id);
 const ymAdd = (ym, k) => { const [y, m] = ym.split('-').map(Number); const d = new Date(y, m - 1 + k, 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'); };
@@ -473,15 +488,16 @@ const SUN = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke=
 function applyTheme() { document.documentElement.dataset.theme = theme; $('#theme').innerHTML = theme === 'dark' ? MOON : SUN; }
 function toggleTheme() { theme = theme === 'dark' ? 'light' : 'dark'; localStorage.setItem('bcpj_theme', theme); applyTheme(); }
 
-/* ===== Split-screen chart comparison (view only; does not change trade data except uploaded images) ===== */
+/* ===== Split-screen chart comparison (view only; does not change data) ===== */
 const BEFORE_LABEL = 'BEFORE (OLDIN / DO) — Entry';
 const AFTER_LABEL = 'AFTER (KEYIN / POSLE) — Result (TP / SL)';
-// TradingView snapshot (tradingview.com/x/ID/) -> direct PNG; direct image URLs pass through; otherwise null
+// TradingView snapshot (tradingview.com/x/ID/) -> direct PNG; direct image URLs pass through; anything else is an iframe
 function snapImage(url) {
   const m = url.match(/tradingview\.com\/x\/([A-Za-z0-9]+)/i);
   if (m) return `https://s3.tradingview.com/${m[1][0].toLowerCase()}/${m[1]}.png`;
   return /\.(png|jpe?g|gif|webp)(\?.*)?$/i.test(url) ? url : null;
 }
+// Each panel: uploaded/pasted image (stored locally) > TradingView snapshot PNG > TradingView chart widget for the pair
 // Preview for regular chart links: webpage screenshot service (external, so it can be blocked in some sandboxes)
 const PREVIEW_BASE = 'https://image.thum.io/get/width/1200/crop/800/';
 function previewUrl(url) { return snapImage(url) || (PREVIEW_BASE + encodeURIComponent(url)); }
@@ -492,7 +508,6 @@ function widgetView(t) {
   return `<iframe class="frame" src="${esc(src)}" referrerpolicy="no-referrer-when-downgrade" title="TradingView ${esc(t.pair)}"></iframe>`;
 }
 function imgView(src) { return `<div class="imgwrap"><img src="${esc(src)}" alt=""></div>`; }
-// Each panel: uploaded/pasted image (stored locally) > TradingView snapshot PNG > screenshot preview; widget fallback on error
 function paneHTML(side, label, t, url) {
   const img = t[side + 'Img'];
   const open = url ? `<a class="open" href="${safeUrl(url)}" target="_blank" rel="noopener">Open in TradingView ↗</a>` : '';
@@ -514,14 +529,11 @@ function openCompare(id) {
   $('#cmpRR').textContent = '1:' + t.rr;
   $('#cmpPnl').innerHTML = `<span class="${p >= 0 ? 'pos' : 'neg'}">${fmt(p)}</span>`;
   $('#cmpBody').innerHTML = paneHTML('before', BEFORE_LABEL, t, t.beforeChart) + paneHTML('after', AFTER_LABEL, t, t.afterChart);
-  $('#cmpBody').querySelectorAll('img.snap').forEach(im => im.onerror = () => {
-    im.parentElement.outerHTML = widgetView(t) + '<div class="cnote">Note: External images are blocked in Claude preview — open the published app in a browser tab to view your exact link snapshot.</div>';
-  });
+  $('#cmpBody').querySelectorAll('img.snap').forEach(im => im.onerror = () => { im.parentElement.outerHTML = widgetView(t) + '<div class="cnote">Note: External images are blocked in Claude preview — open the published app in a browser tab to view your exact link snapshot.</div>'; });
   $('#cmpBody').querySelectorAll('.imgwrap').forEach(w => w.onclick = () => w.classList.toggle('z'));
   $('#cmp').classList.remove('hidden');
 }
 function closeCompare() { $('#cmp').classList.add('hidden'); $('#cmpBody').innerHTML = ''; }
-
 let cmpId = null, activeSide = null;
 function setTarget(side) {
   activeSide = side;
@@ -592,7 +604,7 @@ document.addEventListener('change', e => {
   else if (f === 'rr') t.rr = Math.max(0, +el.value || 0);
   else if (f === 'override') {
     const v = parseUSD(el.value);
-    if (el.value.trim() !== '' && v === null) { alert('Enter an amount like +$150 or -$50'); render(); return; }
+    if (el.value.trim() !== '' && v === null) { alert('$'); render(); return; }
     t.override = v; editing.delete(t.id + '|override');
   }
   else if (f === 'beforeChart' || f === 'afterChart') {
@@ -654,21 +666,31 @@ $('#imp').onchange = e => {
   e.target.value = '';
 };
 
-/* ===== Access gate (deterrent only: client-side checks can be bypassed) ===== */
-function unlocked() { return ['vip', 'pro'].includes(localStorage.getItem('bcpj_access')); }
-function redeem() {
-  const k = $('#lic').value.trim().toUpperCase();
-  if (CONFIG.LICENSE_KEYS.includes(k)) {
-    localStorage.setItem('bcpj_access', 'pro');
-    $('#gate').classList.add('hidden'); $('#gerr').textContent = '';
-  } else $('#gerr').textContent = T('badKey');
+/* ===== Paywall: $50 Pro Access via Lava.top ===== */
+const PAY_URL = 'https://lava.top';
+const BACKUP_CODE = 'BEHRUZ50';
+const UNLOCK_PARAM = 'lava50';
+function isUnlocked() {
+  return localStorage.getItem('bcpj_unlocked') === 'true' || ['vip', 'pro'].includes(localStorage.getItem('bcpj_access'));
 }
-$('#unlock').onclick = redeem;
-$('#lic').onkeydown = e => { if (e.key === 'Enter') redeem(); };
-$('#buy').href = CONFIG.CHECKOUT_URL;
-$('#tg').href = CONFIG.TELEGRAM;
-if (new URLSearchParams(location.search).get('access') === CONFIG.VIP_KEY) localStorage.setItem('bcpj_access', 'vip');
-if (!unlocked()) $('#gate').classList.remove('hidden');
+function grantAccess() {
+  localStorage.setItem('bcpj_unlocked', 'true');
+  $('#gate').classList.add('hidden');
+}
+const qs = new URLSearchParams(location.search);
+if (qs.get('unlocked') === UNLOCK_PARAM) grantAccess();
+if (qs.get('access') === CONFIG.VIP_KEY) localStorage.setItem('bcpj_access', 'vip');
+if (qs.has('unlocked') || qs.has('access')) history.replaceState(null, '', location.pathname + location.hash);
+if (!isUnlocked()) $('#gate').classList.remove('hidden');
+
+$('#payBtn').onclick = () => { window.location.href = PAY_URL; };
+$('#backupToggle').onclick = () => $('#backupBox').classList.toggle('hidden');
+$('#unlock').onclick = () => {
+  if ($('#lic').value.trim().toUpperCase() === BACKUP_CODE) { grantAccess(); $('#gerr').textContent = ''; }
+  else $('#gerr').textContent = 'Invalid backup code. Check your Lava receipt or contact support.';
+};
+$('#lic').onkeydown = e => { if (e.key === 'Enter') $('#unlock').click(); };
+
 
 applyTheme();
 applyStatic();
