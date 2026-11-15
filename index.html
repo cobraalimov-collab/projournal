@@ -2,8 +2,7 @@
 <html lang="en" class="locked"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('bcpj_theme')==='light'?'light':'dark';}catch(e){}
-(function(){var ok=false;try{ok=localStorage.getItem('alimov_pro_unlocked_v2')==='true';}catch(e){}
-if(new URLSearchParams(location.search).get('access_granted')==='alimov_pro_9921x')ok=true;
+(function(){var ok=new URLSearchParams(location.search).get('access_granted')==='allkey_pro_992tx';
 if(ok)document.documentElement.classList.remove('locked');else document.documentElement.classList.add('locked');})();</script>
 <title>Behruz Crypto Pro Journal</title>
 <style>
@@ -692,26 +691,23 @@ $('#imp').onchange = e => {
 /* ===== Paywall: $50 Pro Access via Lava.top ===== */
 const PAY_URL = 'https://app.lava.top/products/9d6ae9a8-4862-4fc4-8781-c85d512be5f5';
 const CRYPTO_URL = 'https://app.paymento.io/payment-link/eca6e71daae142e08654b6f0d26e78d7';
-const UNLOCK_KEY = 'alimov_pro_unlocked_v2';
 const SECRET_PARAM = 'access_granted';
-const SECRET_VALUE = 'alimov_pro_9921x';
+const SECRET_VALUE = 'allkey_pro_992tx';
 function isUnlocked() {
-  return store.getItem(UNLOCK_KEY) === 'true';
+  return new URLSearchParams(location.search).get(SECRET_PARAM) === SECRET_VALUE;
 }
 function grantAccess() {
-  store.setItem(UNLOCK_KEY, 'true');
   document.documentElement.classList.remove('locked');
   $('#gate').classList.add('hidden');
   document.documentElement.classList.remove('locked');
 }
 const qs = new URLSearchParams(location.search);
 if (qs.get(SECRET_PARAM) === SECRET_VALUE) grantAccess();
-if (qs.has(SECRET_PARAM)) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {} }
 if (!isUnlocked()) $('#gate').classList.remove('hidden');
 
 $('#payBtn').onclick = () => { window.location.href = PAY_URL; };
 $('#cryptoBtn').onclick = () => { window.location.href = CRYPTO_URL; };
-['bcp_unlocked','bcpj_unlocked','bcpj_access','bep_unlocked'].forEach(k => { try { store.removeItem(k); } catch (e) {} });
+['bcp_unlocked','bcpj_unlocked','bcpj_access','bep_unlocked','alimov_pro_unlocked_v2'].forEach(k => { try { store.removeItem(k); } catch (e) {} });
 
 
 applyTheme();
