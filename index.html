@@ -143,7 +143,7 @@ html.locked{overflow:hidden}
     <button id="theme" class="theme-btn" title="Dark / Light"></button>
     <button id="exp" data-i="exp"></button>
     <label class="link" style="cursor:pointer"><span data-i="imp"></span><input type="file" id="imp" accept="application/json" hidden></label>
-    <label class="link" style="cursor:pointer"><span data-i="impCsv"></span><input type="file" id="impCsv" accept=".csv,text/csv" hidden></label>
+    <label class="link" style="cursor:pointer;background:var(--acc);color:#fff;border-color:var(--acc);font-weight:600"><span data-i="impCsv"></span><input type="file" id="impCsv" accept=".csv,text/csv" hidden></label>
   </div>
 </div>
 
@@ -264,24 +264,15 @@ const DEFAULT_EMO = ['Calm','Confident','Patient','Greedy','FOMO','Fearful','Rus
 const TODAY = new Date().toISOString().slice(0, 10);
 const CUR = TODAY.slice(0, 7);
 let emotions = JSON.parse(store.getItem(EMO_KEY) || 'null') || DEFAULT_EMO;
-let trades = JSON.parse(store.getItem(KEY) || 'null') || SAMPLE();
+const OLD_SAMPLE_DATES = ['2026-11-02','2026-11-04','2026-11-06','2026-11-09','2026-11-11','2026-11-13'];
+let trades = (JSON.parse(store.getItem(KEY) || 'null') || []).filter(t => !(t.id >= 1 && t.id <= 6 && OLD_SAMPLE_DATES.includes(t.date)));
 let months = JSON.parse(store.getItem(MON_KEY) || '[]');
-let BALANCE = +store.getItem(BAL_KEY) || 10000;
+let BALANCE = +store.getItem(BAL_KEY) || 0;
 let theme = store.getItem('bcpj_theme') === 'light' ? 'light' : 'dark';
 const editing = new Set();
 const hl = new Set();
 
-function SAMPLE() {
-  const c = 'https://www.tradingview.com/chart/';
-  return [
-    {id:1,date:'2026-11-02',pair:'BTCUSDT',side:'L',beforeChart:c,afterChart:c,strategy:['SMC','Order Block'],risk:1,rr:3,outcome:'tp',override:null,tf:'4H',emotions:['Calm','Patient']},
-    {id:2,date:'2026-11-04',pair:'ETHUSDT',side:'S',beforeChart:c,afterChart:c,strategy:['Liquidity Sweep'],risk:1,rr:2,outcome:'sl',override:null,tf:'1H',emotions:['FOMO']},
-    {id:3,date:'2026-11-06',pair:'SOLUSDT',side:'L',beforeChart:c,afterChart:c,strategy:['Liquidity Sweep','SMC'],risk:0.5,rr:3,outcome:'tp',override:null,tf:'15m',emotions:['Confident']},
-    {id:4,date:'2026-11-09',pair:'BTCUSDT',side:'S',beforeChart:c,afterChart:'',strategy:['Order Block'],risk:2,rr:2,outcome:'be',override:null,tf:'1D',emotions:['Fearful']},
-    {id:5,date:'2026-11-11',pair:'ETHUSDT',side:'L',beforeChart:c,afterChart:c,strategy:['SMC'],risk:1,rr:4,outcome:'tp',override:null,tf:'4H',emotions:['Patient','Calm']},
-    {id:6,date:'2026-11-13',pair:'SOLUSDT',side:'S',beforeChart:c,afterChart:c,strategy:['Liquidity Sweep'],risk:1,rr:1.5,outcome:'sl',override:null,tf:'1H',emotions:['Rushed','Greedy']}
-  ];
-}
+function SAMPLE() { return []; }
 
 function save() {
   store.setItem(KEY, JSON.stringify(trades));
