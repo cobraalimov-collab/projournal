@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="utf-8">
+<html lang="en" class="locked"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('bcpj_theme')==='light'?'light':'dark';}catch(e){}
-(function(){var ok=false;try{ok=localStorage.getItem('bcpj_unlocked')==='true'||localStorage.getItem('bcpj_access')==='vip'||localStorage.getItem('bcpj_access')==='pro';}catch(e){}
+(function(){var ok=false;try{ok=localStorage.getItem('bcp_unlocked')==='true'||localStorage.getItem('bcpj_unlocked')==='true'||localStorage.getItem('bcpj_access')==='vip'||localStorage.getItem('bcpj_access')==='pro';}catch(e){}
 var q=location.search;if(q.indexOf('unlocked=lava50')>-1||q.indexOf('access=behruz-vip')>-1)ok=true;
-if(!ok)document.documentElement.classList.add('locked');})();</script>
+if(ok)document.documentElement.classList.remove('locked');else document.documentElement.classList.add('locked');})();</script>
 <title>Behruz Crypto Pro Journal</title>
 <style>
 :root{color-scheme:dark;--bg:#000000;--card:#0A0A0A;--line:#1F1F23;--txt:#E6EBF2;--mut:#7D8898;--input:#111113;--tag:#1A1A1E;--zero:#333333;--g:#16C784;--r:#EA3943;--acc:#3b82f6}
@@ -103,6 +103,8 @@ button.S{background:var(--r);color:#fff}
 #gate{background:#0D0F12;padding:20px}
 html.locked body{background:#0D0F12}
 html.locked body>*:not(#gate){display:none!important}
+html:not(.locked) #gate{display:none!important}
+html.locked{overflow:hidden}
 .gate-card{max-width:420px;width:100%;background:#161920;border:1px solid #262A34;border-radius:18px;padding:28px 24px;margin:0 auto;text-align:center;color:#fff}
 .gate-badge{display:inline-block;border:1px solid #F59E0B;color:#F59E0B;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:600;margin-bottom:16px;background:transparent}
 .gate-title{font-size:28px;font-weight:800;color:#fff;margin:0 0 8px}
@@ -119,7 +121,7 @@ html.locked body>*:not(#gate){display:none!important}
 </style></head>
 <body>
 
-<div id="gate" class="modal hidden"><div class="gate-card">
+<div id="gate" class="modal"><div class="gate-card">
   <div class="gate-badge">🔒 Cheklangan kirish</div>
   <h1 class="gate-title">Trading Jurnali</h1>
   <p class="gate-sub">Savdolaringizni intizom bilan boshqaring va natijangizni aniq ko'ring.</p>
@@ -696,20 +698,21 @@ $('#imp').onchange = e => {
 };
 
 /* ===== Paywall: $50 Pro Access via Lava.top ===== */
-const PAY_URL = 'https://lava.top';
+const PAY_URL = 'https://app.lava.top/products/9d6ae9a8-4862-4fc4-8781-c85d512be5f5';
 const BACKUP_CODE = 'BEHRUZ50';
 const UNLOCK_PARAM = 'lava50';
 function isUnlocked() {
-  return store.getItem('bcpj_unlocked') === 'true' || ['vip', 'pro'].includes(store.getItem('bcpj_access'));
+  return store.getItem('bcp_unlocked') === 'true' || store.getItem('bcpj_unlocked') === 'true' || ['vip', 'pro'].includes(store.getItem('bcpj_access'));
 }
 function grantAccess() {
-  store.setItem('bcpj_unlocked', 'true');
+  store.setItem('bcp_unlocked', 'true');
+  document.documentElement.classList.remove('locked');
   $('#gate').classList.add('hidden');
   document.documentElement.classList.remove('locked');
 }
 const qs = new URLSearchParams(location.search);
 if (qs.get('unlocked') === UNLOCK_PARAM) grantAccess();
-if (qs.get('access') === CONFIG.VIP_KEY) store.setItem('bcpj_access', 'vip');
+if (qs.get('access') === CONFIG.VIP_KEY) grantAccess();
 if (qs.has('unlocked') || qs.has('access')) try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
 if (!isUnlocked()) $('#gate').classList.remove('hidden');
 
