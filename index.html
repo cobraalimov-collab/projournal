@@ -2,8 +2,8 @@
 <html lang="en" class="locked"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>try{document.documentElement.dataset.theme=localStorage.getItem('bcpj_theme')==='light'?'light':'dark';}catch(e){}
-(function(){var ok=false;try{ok=localStorage.getItem('bcp_unlocked')==='true'||localStorage.getItem('bcpj_unlocked')==='true'||localStorage.getItem('bcpj_access')==='vip'||localStorage.getItem('bcpj_access')==='pro';}catch(e){}
-var q=location.search;if(q.indexOf('unlocked=lava50')>-1||q.indexOf('access=behruz-vip')>-1)ok=true;
+(function(){var ok=false;try{ok=localStorage.getItem('alimov_pro_unlocked_v2')==='true';}catch(e){}
+if(new URLSearchParams(location.search).get('access_granted')==='alimov_pro_9921x')ok=true;
 if(ok)document.documentElement.classList.remove('locked');else document.documentElement.classList.add('locked');})();</script>
 <title>Behruz Crypto Pro Journal</title>
 <style>
@@ -132,13 +132,6 @@ html.locked{overflow:hidden}
   <div class="gate-price-sub">(Lifetime Access)</div>
   <button id="payBtn" class="gate-btn gate-card-btn">💳 Karta orqali to'lash ($50)</button>
   <button id="cryptoBtn" class="gate-btn gate-crypto-btn">🪙 Kripto (USDT) orqali to'lash ($50)</button>
-  <div class="gate-backup">
-    <a id="backupToggle">Allaqachon to'laganmisiz? Kirish kodini kiritish</a>
-    <div id="backupBox" class="hidden">
-      <div class="bar"><input id="lic" placeholder="Kirish kodi" style="flex:1"><button class="p" id="unlock">Ochish</button></div>
-      <div id="gerr" class="err"></div>
-    </div>
-  </div>
 </div></div>
 
 
@@ -182,7 +175,6 @@ const store = (() => {
 })();
 /* ===== CONFIG (move to env in production) ===== */
 const CONFIG = {
-  VIP_KEY: 'behruz-vip',
   TELEGRAM: 'https://t.me/yourhandle'
 };
 
@@ -699,32 +691,27 @@ $('#imp').onchange = e => {
 
 /* ===== Paywall: $50 Pro Access via Lava.top ===== */
 const PAY_URL = 'https://app.lava.top/products/9d6ae9a8-4862-4fc4-8781-c85d512be5f5';
-const BACKUP_CODE = 'BEHRUZ50';
-const UNLOCK_PARAM = 'lava50';
+const CRYPTO_URL = 'https://app.paymento.io/payment-link/eca6e71daae142e08654b6f0d26e78d7';
+const UNLOCK_KEY = 'alimov_pro_unlocked_v2';
+const SECRET_PARAM = 'access_granted';
+const SECRET_VALUE = 'alimov_pro_9921x';
 function isUnlocked() {
-  return store.getItem('bcp_unlocked') === 'true' || store.getItem('bcpj_unlocked') === 'true' || ['vip', 'pro'].includes(store.getItem('bcpj_access'));
+  return store.getItem(UNLOCK_KEY) === 'true';
 }
 function grantAccess() {
-  store.setItem('bcp_unlocked', 'true');
+  store.setItem(UNLOCK_KEY, 'true');
   document.documentElement.classList.remove('locked');
   $('#gate').classList.add('hidden');
   document.documentElement.classList.remove('locked');
 }
 const qs = new URLSearchParams(location.search);
-if (qs.get('unlocked') === UNLOCK_PARAM) grantAccess();
-if (qs.get('access') === CONFIG.VIP_KEY) grantAccess();
-if (qs.has('unlocked') || qs.has('access')) try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {}
+if (qs.get(SECRET_PARAM) === SECRET_VALUE) grantAccess();
+if (qs.has(SECRET_PARAM)) { try { history.replaceState(null, '', location.pathname + location.hash); } catch (e) {} }
 if (!isUnlocked()) $('#gate').classList.remove('hidden');
 
 $('#payBtn').onclick = () => { window.location.href = PAY_URL; };
-const CRYPTO_URL = 'https://app.paymento.io/payment-link/eca6e71daae142e08654b6f0d26e78d7';
 $('#cryptoBtn').onclick = () => { window.location.href = CRYPTO_URL; };
-$('#backupToggle').onclick = () => $('#backupBox').classList.toggle('hidden');
-$('#unlock').onclick = () => {
-  if ($('#lic').value.trim().toUpperCase() === BACKUP_CODE) { grantAccess(); $('#gerr').textContent = ''; }
-  else $('#gerr').textContent = 'Invalid backup code. Check your Lava receipt or contact support.';
-};
-$('#lic').onkeydown = e => { if (e.key === 'Enter') $('#unlock').click(); };
+['bcp_unlocked','bcpj_unlocked','bcpj_access','bep_unlocked'].forEach(k => { try { store.removeItem(k); } catch (e) {} });
 
 
 applyTheme();
