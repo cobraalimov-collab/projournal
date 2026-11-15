@@ -143,6 +143,7 @@ html.locked{overflow:hidden}
     <button id="theme" class="theme-btn" title="Dark / Light"></button>
     <button id="exp" data-i="exp"></button>
     <label class="link" style="cursor:pointer"><span data-i="imp"></span><input type="file" id="imp" accept="application/json" hidden></label>
+    <label class="link" style="cursor:pointer"><span data-i="impCsv"></span><input type="file" id="impCsv" accept=".csv,text/csv" hidden></label>
   </div>
 </div>
 
@@ -181,7 +182,7 @@ const CONFIG = {
 const I18N = {
   en: {
     title:'Behruz Crypto Pro Journal', sub:'Each month is isolated. P&L is in USD. Data is saved in this browser. Export regularly.',
-    balance:'Balance / Capital ($)', newMonth:'+ Start New Month', newTrade:'+ New Trade', analyze:'Analyze Month', done:'Completed', exp:'Export JSON', imp:'Import JSON',
+    balance:'Balance / Capital ($)', newMonth:'+ Start New Month', newTrade:'+ New Trade', analyze:'Analyze Month', done:'Completed', exp:'Export JSON', imp:'Import JSON', impCsv:'Import CSV',
     monthly:'Monthly', annual:'Annual', period:'Period', cTrades:'Trades',
     kTrades:'Trades', kWin:'Win rate', kNet:'Net P&L', kAvg:'Avg R',
     chartPL:'Profit & Loss Sequence ($)', chartEmo:'Emotions & Performance Sequence', noChart:'No trades this month',
@@ -204,7 +205,7 @@ const I18N = {
   },
   ru: {
     title:'Behruz Crypto Pro Journal', sub:'Каждый месяц изолирован. P&L в долларах. Данные хранятся в этом браузере. Регулярно экспортируйте их.',
-    balance:'Баланс / Капитал ($)', newMonth:'+ Новый месяц', newTrade:'+ Сделка', analyze:'Анализ месяца', done:'Завершён', exp:'Экспорт JSON', imp:'Импорт JSON',
+    balance:'Баланс / Капитал ($)', newMonth:'+ Новый месяц', newTrade:'+ Сделка', analyze:'Анализ месяца', done:'Завершён', exp:'Экспорт JSON', imp:'Импорт JSON', impCsv:'Импорт CSV',
     monthly:'По месяцам', annual:'По годам', period:'Период', cTrades:'Сделки',
     kTrades:'Сделки', kWin:'Винрейт', kNet:'Общий P&L', kAvg:'Средний R',
     chartPL:'Кривая прибыли и убытков ($)', chartEmo:'Эмоции и результаты', noChart:'Нет сделок за месяц',
@@ -227,7 +228,7 @@ const I18N = {
   },
   uz: {
     title:'Behruz Crypto Pro Journal', sub:'Har bir oy alohida saqlanadi. P&L AQSh dollarida. Ma’lumotlar shu brauzerda saqlanadi. Muntazam eksport qiling.',
-    balance:'Balans / Kapital ($)', newMonth:'+ Yangi oy', newTrade:'+ Savdo', analyze:'Oyni tahlil qilish', done:'Yakunlangan', exp:'JSON eksport', imp:'JSON import',
+    balance:'Balans / Kapital ($)', newMonth:'+ Yangi oy', newTrade:'+ Savdo', analyze:'Oyni tahlil qilish', done:'Yakunlangan', exp:'JSON eksport', imp:'JSON import', impCsv:'CSV import',
     monthly:'Oylik', annual:'Yillik', period:'Davr', cTrades:'Savdolar',
     kTrades:'Savdolar', kWin:'Yutish foizi', kNet:'Umumiy P&L', kAvg:'O’rtacha R',
     chartPL:'Foyda va Zarar Ketma-ketligi ($)', chartEmo:'Emotsiyalar va Natijalar Ketma-ketligi', noChart:'Bu oyda savdo yo’q',
@@ -418,7 +419,7 @@ function rowHTML(t) {
   return `<tr>
     <td><button class="cv" data-act="compare" data-id="${t.id}" title="Chart comparison">📊</button></td>
     <td><input type="date" class="d" data-id="${t.id}" data-f="date" value="${t.date}"></td>
-    <td><input class="pr" data-id="${t.id}" data-f="pair" value="${esc(t.pair)}"></td>
+    <td><input class="pr" title="${esc(t.note || '')}" data-id="${t.id}" data-f="pair" value="${esc(t.pair)}"></td>
     <td><button class="${t.side}" data-act="side" data-id="${t.id}">${t.side === 'L' ? esc(T('long')) : esc(T('short'))}</button></td>
     <td>${linkCell(t, 'beforeChart', T('cBefore'))}</td>
     <td>${linkCell(t, 'afterChart', T('cAfter'))}</td>
@@ -610,6 +611,78 @@ document.addEventListener('paste', async e => {
 $('#cmpClose').onclick = closeCompare;
 document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('#cmp').classList.contains('hidden')) closeCompare(); });
 
+/* ===== CSV import (Notion export: Date time, para, pozitsiya, before, after, argument, Risk%, R/R, Foyda, pribl, comment) ===== */
+function parseCSV(text) {
+  const rows = []; let row = [], cell = '', q = false;
+  text = text.replace(/^\uFEFF/, '');
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (q) {
+      if (c === '"') { if (text[i + 1] === '"') { cell += '"'; i++; } else q = false; }
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === ',') { row.push(cell); cell = ''; }
+    else if (c === '\n' || c === '\r') {
+      if (c === '\r' && text[i + 1] === '\n') i++;
+      row.push(cell); rows.push(row); row = []; cell = '';
+    }
+    else cell += c;
+  }
+  if (cell !== '' || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim() !== ''));
+}
+const CSV_MONTHS = {january:1,february:2,march:3,april:4,may:5,june:6,july:7,august:8,september:9,october:10,november:11,december:12};
+// "July 8, 2026 10:00 PM (GMT+3) → 10:00 PM" -> "2026-07-08" (the date as written; no timezone shift)
+function csvDate(s) {
+  const m = String(s).match(/([A-Za-z]+)\s+(\d{1,2}),\s*(\d{4})/);
+  if (!m || !CSV_MONTHS[m[1].toLowerCase()]) return null;
+  return m[3] + '-' + String(CSV_MONTHS[m[1].toLowerCase()]).padStart(2, '0') + '-' + String(m[2]).padStart(2, '0');
+}
+const csvNum = s => { const v = parseFloat(String(s).replace(/[$%,\s]/g, '')); return isNaN(v) ? null : v; };
+function importCSV(text) {
+  const rows = parseCSV(text);
+  if (rows.length < 2) throw new Error('empty');
+  const head = rows[0].map(h => h.trim().toLowerCase());
+  const C = {date: head.indexOf('date time'), pair: head.indexOf('para'), side: head.indexOf('pozitsiya'),
+    before: head.indexOf('before'), after: head.indexOf('after'), arg: head.indexOf('argument'),
+    risk: head.indexOf('risk%'), rr: head.indexOf('r/r'), pnl: head.indexOf('foyda'),
+    res: head.indexOf('pribl'), note: head.indexOf('comment')};
+  if (C.date < 0 || C.pair < 0 || C.res < 0) throw new Error('columns');
+  const get = (r, k) => (C[k] >= 0 && r[C[k]] !== undefined ? r[C[k]].trim() : '');
+  const base = Date.now();
+  const seen = new Set(trades.map(t => [t.date, t.pair, t.beforeChart, t.afterChart].join('|')));
+  let added = 0, skipped = 0, bad = 0;
+  rows.slice(1).forEach((r, i) => {
+    const date = csvDate(get(r, 'date')), pair = get(r, 'pair').replace(/\s+/g, '').toUpperCase();
+    if (!date || !pair) { bad++; return; }
+    const before = get(r, 'before'), after = get(r, 'after');
+    const key = [date, pair, before, after].join('|');
+    if (seen.has(key)) { skipped++; return; }
+    seen.add(key);
+    const res = get(r, 'res').toLowerCase();
+    const outcome = /take/.test(res) ? 'tp' : /stop|loss/.test(res) ? 'sl' : 'be';
+    const usd = csvNum(get(r, 'pnl'));
+    const arg = get(r, 'arg');
+    trades.push({
+      id: base + i, date, pair,
+      side: /short/i.test(get(r, 'side')) ? 'S' : 'L',
+      beforeChart: /^https?:\/\//i.test(before) ? before : '',
+      afterChart: /^https?:\/\//i.test(after) ? after : '',
+      strategy: arg ? arg.split(',').map(x => x.trim()).filter(Boolean) : [],
+      risk: csvNum(get(r, 'risk')) ?? 1,
+      rr: csvNum(get(r, 'rr')) ?? 1,
+      outcome,
+      override: usd !== null ? usd : (outcome === 'be' ? 0 : null),
+      tf: '',
+      emotions: [],
+      note: get(r, 'note')
+    });
+    added++;
+  });
+  save(); render();
+  return {added, skipped, bad};
+}
+
 /* ===== Events ===== */
 document.addEventListener('change', e => {
   const el = e.target, f = el.dataset.f;
@@ -662,6 +735,18 @@ document.addEventListener('click', e => {
   save(); render();
 });
 
+$('#impCsv').onchange = e => {
+  const file = e.target.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try {
+      const res = importCSV(r.result);
+      alert('Imported ' + res.added + ' trades. Skipped ' + res.skipped + ' already in the journal' + (res.bad ? ', ' + res.bad + ' rows could not be read.' : '.'));
+    } catch (err) { alert('This CSV does not match the expected Notion export columns.'); }
+  };
+  r.readAsText(file);
+  e.target.value = '';
+};
 $('#exp').onclick = () => {
   const blob = new Blob([JSON.stringify({version: 4, balance: BALANCE, trades, emotions, months}, null, 2)], {type: 'application/json'});
   const a = document.createElement('a');
