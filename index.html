@@ -117,6 +117,61 @@ html.locked{overflow:hidden}
 .gate-backup{margin-top:14px;font-size:12px}
 .gate-backup a{color:#8B93A7;text-decoration:underline;cursor:pointer}
 .gate-backup #backupBox{margin-top:10px;text-align:left}
+
+:root{--bg:#0D1421;--card:#171924;--line:#222531;--txt:#FFFFFF;--mut:#808A9D;--input:#1E2230;--tag:#1E2230;--zero:#2A2F3D;--acc:#3861FB;--g:#16C784;--r:#EA3943}
+body{font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;font-variant-numeric:tabular-nums}
+.card{border-radius:12px;border:1px solid var(--line);background:var(--card)}
+h1{font-size:20px;font-weight:700}
+.card>b,h2{font-size:15px;font-weight:600}
+table{font-size:13px;font-weight:500}
+th{font-size:11px;font-weight:400;color:var(--mut)}
+.hero{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-bottom:14px}
+@media(max-width:800px){.hero{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.hk{margin:0;display:flex;flex-direction:column;gap:6px}
+.hk span{font-size:11px;color:var(--mut)}
+.hk b{font-size:22px;font-weight:700}
+.hk.score{flex-direction:row;align-items:center;justify-content:space-between}
+.ctab tr{height:52px;cursor:pointer}
+.ctab td,.ctab th{border-bottom:1px solid var(--line);vertical-align:middle}
+.ctab tbody tr:hover td{background:#1E2230}
+.stk{position:sticky;left:0;background:var(--card);z-index:2;width:160px}
+.ctab tbody tr:hover td.stk{background:#1E2230}
+.av{display:inline-block;width:24px;height:24px;border-radius:50%;background:#2A2F3D;color:#fff;font-size:9px;font-weight:700;text-align:center;line-height:24px;margin-right:8px;vertical-align:middle}
+.side{display:inline-block;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600}
+.side.L{background:rgba(22,199,132,.12);color:#16C784}
+.side.S{background:rgba(234,57,67,.12);color:#EA3943}
+.pill{display:inline-block;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:600}
+.pill.tp{background:rgba(22,199,132,.12);color:#16C784}
+.pill.sl{background:rgba(234,57,67,.12);color:#EA3943}
+.pill.be{background:#2A2F3D;color:#808A9D}
+.num{text-align:right}
+.calgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;margin:10px 0 14px}
+.wd{font-size:11px;color:var(--mut);text-align:center}
+.cal{border:1px solid var(--line);border-radius:8px;padding:6px;min-height:64px;background:var(--card);font-size:12px;display:flex;flex-direction:column;gap:2px}
+.cal.win{background:rgba(22,199,132,.15);border-color:#16C784}
+.cal.loss{background:rgba(234,57,67,.15);border-color:#EA3943}
+.cal .dn{font-size:11px;color:var(--mut)}
+.cal small{color:var(--mut);font-size:10px}
+.ptabs{display:inline-flex;background:var(--input);border-radius:8px;padding:2px}
+.ptabs button{border:0;background:transparent;color:var(--mut);padding:4px 10px;border-radius:6px;font-size:12px}
+.ptabs button.on{background:var(--acc);color:#fff}
+.tilt{background:rgba(234,57,67,.12);color:#EA3943;border:1px solid #EA3943;border-radius:8px;padding:8px 10px;font-size:12px;margin-bottom:10px}
+.tip{position:fixed;display:none;background:#222531;color:#fff;border-radius:8px;padding:8px 10px;font-size:12px;pointer-events:none;z-index:10000;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.dr-back{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9000}
+.dr-panel{position:fixed;top:0;right:0;bottom:0;width:min(420px,100vw);background:var(--card);border-left:1px solid var(--line);z-index:9001;overflow:auto;padding:14px}
+@media(max-width:600px){.dr-panel{top:auto;height:82vh;width:100vw;border-left:0;border-top:1px solid var(--line);border-radius:14px 14px 0 0}}
+.dr-head{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.dr-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.dr-grid label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--mut)}
+.dr-grid label.full{grid-column:1/-1}
+.dr-grid input,.dr-grid select{width:100%}
+.dr-links{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.dr-links div{display:flex;justify-content:space-between;font-size:12px;color:var(--mut)}
+.dr-links input{width:100%}
+.dr-emo{margin-top:12px}
+.dr-actions{margin-top:16px;display:flex;justify-content:space-between;gap:8px}
+.dr-del{background:rgba(234,57,67,.12);color:#EA3943;border:1px solid #EA3943}
+.ring text{font-weight:700}
 </style></head>
 <body>
 
@@ -146,10 +201,13 @@ html.locked{overflow:hidden}
   </div>
 </div>
 
+<div class="hero" id="hero"></div>
 <div class="periods" id="periods"></div>
 <div id="months"></div>
 
 <datalist id="tfs"><option>15m</option><option>1H</option><option>4H</option><option>1D</option></datalist>
+<div id="tip" class="tip"></div>
+<div id="drawer"></div>
 
 <div id="cmp" class="cmp hidden" role="dialog" aria-modal="true">
   <div class="cmp-head">
@@ -193,7 +251,7 @@ const I18N = {
     badLink:'Please paste a full https:// link', badFile:'Invalid journal file',
     buy:'Buy Access', questions:'Questions:', tg:'Telegram DM', gateSub:'Track every trade, measure your edge, never lose your data.',
     lic:'Enter license key', unlock:'Unlock', badKey:'Invalid key. Check your receipt or DM for access.',
-    auditTitle:'Monthly AI Audit & Mistake Analysis', noData:'No trades to analyze yet.', noLoss:'No losing trades this month. Strong discipline.',
+    tilt:'Tilt alert: consecutive losses or FOMO/Greed trades detected. Take a cooldown break before your next entry.', auditTitle:'Monthly AI Audit & Mistake Analysis', noData:'No trades to analyze yet.', noLoss:'No losing trades this month. Strong discipline.',
     emoLoss:(e,n,p)=>`Trades opened in ${e} state: ${n} losing, costing ${p}`,
     worst:(pr,tf,w)=>`${pr} (${tf}) has the most stop-losses, win rate ${w}%`,
     riskHi:(n,a)=>`${n} trade(s) risked more than your monthly average of ${a}%`,
@@ -216,7 +274,7 @@ const I18N = {
     badLink:'Вставьте полную ссылку https://', badFile:'Неверный файл журнала',
     buy:'Купить доступ', questions:'Вопросы:', tg:'Telegram', gateSub:'Ведите учёт каждой сделки и никогда не теряйте данные.',
     lic:'Введите лицензионный ключ', unlock:'Открыть', badKey:'Неверный ключ. Проверьте чек или напишите нам.',
-    auditTitle:'Ежемесячный AI-аудит и разбор ошибок', noData:'Пока нет сделок для анализа.', noLoss:'В этом месяце нет убыточных сделок. Отличная дисциплина.',
+    tilt:'Внимание: серия убытков или сделки FOMO/жадность. Сделайте перерыв перед следующим входом.', auditTitle:'Ежемесячный AI-аудит и разбор ошибок', noData:'Пока нет сделок для анализа.', noLoss:'В этом месяце нет убыточных сделок. Отличная дисциплина.',
     emoLoss:(e,n,p)=>`Сделки в состоянии «${e}»: ${n} убыточных, итог ${p}`,
     worst:(pr,tf,w)=>`${pr} (${tf}) — больше всего стопов, винрейт ${w}%`,
     riskHi:(n,a)=>`${n} сделок с риском выше среднего за месяц (${a}%)`,
@@ -239,7 +297,7 @@ const I18N = {
     badLink:'To’liq https:// havolasini kiriting', badFile:'Noto’g’ri fayl',
     buy:'Kirish huquqini sotib olish', questions:'Savollar:', tg:'Telegram', gateSub:'Har bir savdoni kuzating va ma’lumotlaringizni yo’qotmang.',
     lic:'Litsenziya kalitini kiriting', unlock:'Ochish', badKey:'Kalit noto’g’ri. Kvitansiyani tekshiring yoki yozing.',
-    auditTitle:'Oylik AI audit va xatolar tahlili', noData:'Tahlil uchun hali savdo yo’q.', noLoss:'Bu oyda zararli savdo yo’q. Ajoyib intizom.',
+    tilt:'Ogohlantirish: ketma-ket zarar yoki FOMO/Ochko’zlik savdolari aniqlandi. Keyingi kirishdan oldin tanaffus qiling.', auditTitle:'Oylik AI audit va xatolar tahlili', noData:'Tahlil uchun hali savdo yo’q.', noLoss:'Bu oyda zararli savdo yo’q. Ajoyib intizom.',
     emoLoss:(e,n,p)=>`${e} holatida ochilgan ${n} ta savdo ${p} zarar keltirdi`,
     worst:(pr,tf,w)=>`${pr} (${tf}) eng ko’p stop-loss bergan juftlik — yutish ${w}%`,
     riskHi:(n,a)=>`${n} ta savdoda risk oylik o’rtacha (${a}%) dan yuqori bo’lgan`,
@@ -325,37 +383,65 @@ const newTrade = date => ({id: Date.now(), date, pair: 'BTCUSDT', side: 'L', bef
   strategy: [], risk: 1, rr: 2, outcome: 'be', override: null, tf: '1H', emotions: []});
 
 /* ===== Charts (one month only, values in USD) ===== */
-function charts(f) {
-  const W = 520, H = 220, TOP = 16, BOT = 170, P = 26, GREEN = '#16C784', RED = '#EA3943', n = f.length;
-  let c = 0;
-  const pts = [0, ...f.map(t => c = r2(c + pnl(t)))];
-  const mn = Math.min(0, ...pts), mx = Math.max(0, ...pts);
-  const X = i => P + i * (W - 2 * P) / Math.max(1, n);
-  const Y = v => TOP + (mx - v) / ((mx - mn) || 1) * (BOT - TOP);
-  const pairLabel = p => esc(String(p).replace(/(USDT|USDC|USD)$/, '/$1'));
-  const left = (t, p, col, x) =>
-    `<text x="${x}" y="${BOT + 16}" text-anchor="middle" font-size="10" style="fill:var(--txt)">${pairLabel(t.pair)}</text>` +
-    `<text x="${x}" y="${BOT + 30}" text-anchor="middle" font-size="10" fill="${col}">${fmt(p)}</text>`;
-  const right = (t, p, col, x) =>
-    (t.emotions.length ? t.emotions : ['—']).slice(0, 3).map((e, k) =>
-      `<text x="${x}" y="${BOT + 16 + k * 13}" text-anchor="middle" font-size="10" fill="${col}">${esc(EMO(e))}</text>`).join('');
-  const one = (title, fn) => {
-    const body = n ? `
-      <line x1="${P}" x2="${W - P}" y1="${Y(0)}" y2="${Y(0)}" stroke-dasharray="4" style="stroke:var(--zero)"/>
-      <line x1="${P}" x2="${W - P}" y1="${BOT}" y2="${BOT}" style="stroke:var(--line)"/>
-      ${f.map((t, i) => `<line x1="${X(i)}" y1="${Y(pts[i])}" x2="${X(i + 1)}" y2="${Y(pts[i + 1])}" stroke="${pnl(t) >= 0 ? GREEN : RED}" stroke-width="2.5" stroke-linecap="round"/>`).join('')}
-      ${f.map((t, i) => { const p = pnl(t), col = p >= 0 ? GREEN : RED;
-        return `<circle cx="${X(i + 1)}" cy="${Y(pts[i + 1])}" r="4" fill="${col}"/>` + fn(t, p, col, X(i + 1)); }).join('')}`
-      : `<text x="${W / 2}" y="${H / 2}" text-anchor="middle" font-size="12" style="fill:var(--mut)">${esc(T('noChart'))}</text>`;
-    return `<div class="card"><b>${esc(title)}</b><svg viewBox="0 0 ${W} ${H}">${body}</svg></div>`;
-  };
-  return one(T('chartPL'), left) + one(T('chartEmo'), right);
+/* ===== Charts: smooth gradient curves, tooltips (USD) ===== */
+let chartUid = 0;
+const pairRaw = p => String(p).replace(/(USDT|USDC|USD)$/, '/$1');
+function smoothPath(P) {
+  if (P.length < 2) return '';
+  let d = 'M' + P[0][0].toFixed(1) + ',' + P[0][1].toFixed(1);
+  for (let i = 0; i < P.length - 1; i++) {
+    const p0 = P[i - 1] || P[i], p1 = P[i], p2 = P[i + 1], p3 = P[i + 2] || p2, k = 0.18;
+    const c1x = p1[0] + (p2[0] - p0[0]) * k, c1y = p1[1] + (p2[1] - p0[1]) * k;
+    const c2x = p2[0] - (p3[0] - p1[0]) * k, c2y = p2[1] - (p3[1] - p1[1]) * k;
+    d += ' C' + c1x.toFixed(1) + ',' + c1y.toFixed(1) + ' ' + c2x.toFixed(1) + ',' + c2y.toFixed(1) + ' ' + p2[0].toFixed(1) + ',' + p2[1].toFixed(1);
+  }
+  return d;
 }
+function lineChart(f, title, kind) {
+  const W = 520, H = 220, TOP = 16, BOT = 170, P = 26, GREEN = '#16C784', RED = '#EA3943';
+  const n = f.length, id = 'c' + (++chartUid);
+  if (!n) return `<div class="card"><b>${esc(title)}</b><svg viewBox="0 0 ${W} ${H}"><text x="${W / 2}" y="${H / 2}" text-anchor="middle" font-size="12" style="fill:var(--mut)">${esc(T('noChart'))}</text></svg></div>`;
+  let c = 0;
+  const vals = [0, ...f.map(t => c = r2(c + pnl(t)))];
+  const mn = Math.min(0, ...vals), mx = Math.max(0, ...vals), span = (mx - mn) || 1;
+  const X = i => P + i * (W - 2 * P) / Math.max(1, n);
+  const Y = v => TOP + (mx - v) / span * (BOT - TOP);
+  const zo = Math.min(1, Math.max(0, (Y(0) - TOP) / (BOT - TOP)));
+  const pts = vals.map((v, i) => [X(i), Y(v)]);
+  const line = smoothPath(pts);
+  const area = line + ' L' + X(n).toFixed(1) + ',' + Y(0).toFixed(1) + ' L' + X(0).toFixed(1) + ',' + Y(0).toFixed(1) + ' Z';
+  const defs = `<defs>
+    <linearGradient id="a${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${TOP}" x2="0" y2="${BOT}"><stop offset="0" stop-color="${GREEN}" stop-opacity=".35"/><stop offset="${zo}" stop-color="${GREEN}" stop-opacity=".04"/><stop offset="${zo}" stop-color="${RED}" stop-opacity=".04"/><stop offset="1" stop-color="${RED}" stop-opacity=".35"/></linearGradient>
+    <linearGradient id="s${id}" gradientUnits="userSpaceOnUse" x1="0" y1="${TOP}" x2="0" y2="${BOT}"><stop offset="0" stop-color="${GREEN}"/><stop offset="${zo}" stop-color="${GREEN}"/><stop offset="${zo}" stop-color="${RED}"/><stop offset="1" stop-color="${RED}"/></linearGradient>
+  </defs>`;
+  const dots = f.map((t, i) => {
+    const p = pnl(t), col = p >= 0 ? GREEN : RED, x = X(i + 1), y = Y(vals[i + 1]);
+    const label = kind === 'pnl'
+      ? `<text x="${x}" y="${BOT + 16}" text-anchor="middle" font-size="10" style="fill:var(--txt)">${esc(pairRaw(t.pair))}</text><text x="${x}" y="${BOT + 30}" text-anchor="middle" font-size="10" fill="${col}">${esc(fmt(p))}</text>`
+      : `<text x="${x}" y="${BOT + 16}" text-anchor="middle" font-size="10" fill="${col}">${esc(t.emotions[0] ? EMO(t.emotions[0]) : '—')}</text>`;
+    const tipAttrs = `data-pair="${esc(pairRaw(t.pair))}" data-pnl="${esc(fmt(p))}" data-rr="${esc('1:' + t.rr)}" data-emo="${esc(t.emotions.map(EMO).join(', ') || '—')}"`;
+    return `<g class="pt" ${tipAttrs}><circle cx="${x}" cy="${y}" r="9" fill="transparent"/><circle cx="${x}" cy="${y}" r="4" fill="${col}"/></g>` + label;
+  }).join('');
+  return `<div class="card"><b>${esc(title)}</b><svg viewBox="0 0 ${W} ${H}">${defs}
+    <line x1="${P}" x2="${W - P}" y1="${Y(0)}" y2="${Y(0)}" stroke-dasharray="4" style="stroke:var(--zero)"/>
+    <line x1="${P}" x2="${W - P}" y1="${BOT}" y2="${BOT}" style="stroke:var(--line)"/>
+    <path d="${area}" fill="url(#a${id})"/>
+    <path d="${line}" fill="none" stroke="url(#s${id})" stroke-width="2.5" stroke-linecap="round"/>
+    ${dots}</svg></div>`;
+}
+function charts(f) { return lineChart(f, T('chartPL'), 'pnl') + lineChart(f, T('chartEmo'), 'emo'); }
+function showTip(el, e) {
+  const d = el.dataset, tp = document.getElementById('tip');
+  tp.innerHTML = '<b>' + esc(d.pair) + '</b><br>P&amp;L ' + esc(d.pnl) + '<br>R:R ' + esc(d.rr) + '<br>' + esc(d.emo);
+  tp.style.display = 'block'; tp.style.left = (e.clientX + 12) + 'px'; tp.style.top = (e.clientY + 12) + 'px';
+}
+document.addEventListener('mouseover', e => { const p = e.target.closest && e.target.closest('.pt'); if (p) showTip(p, e); else { const tp = document.getElementById('tip'); if (tp) tp.style.display = 'none'; } });
+document.addEventListener('click', e => { const p = e.target.closest && e.target.closest('.pt'); if (p) showTip(p, e); });
 
 /* ===== Monthly AI audit (rule-based, this month only, USD) ===== */
 function audit(f) {
-  const box = L => `<div class="card audit"><b>${esc(T('auditTitle'))}</b><ul>${L.map(([c, s]) => `<li class="${c}">${s}</li>`).join('')}</ul></div>`;
-  if (!f.length) return box([['', esc(T('noData'))]]);
+  const box = (L, tilt) => `<div class="card audit">${tilt ? `<div class="tilt">${esc(T('tilt'))}</div>` : ''}<b>${esc(T('auditTitle'))}</b><ul>${L.map(([c, s]) => `<li class="${c}">${s}</li>`).join('')}</ul></div>`;
+  if (!f.length) return box([['', esc(T('noData'))]], false);
   const L = [];
   const losses = f.filter(t => t.outcome === 'sl');
   if (!losses.length) L.push(['good', esc(T('noLoss'))]);
@@ -367,17 +453,18 @@ function audit(f) {
   Object.entries(em).sort((a, b) => a[1].p - b[1].p).slice(0, 2)
     .forEach(([e, o]) => L.push(['warn', esc(T('emoLoss')(EMO(e), o.n, fmt(o.p)))]));
 
+  // Win rate per pair: TP / (TP + SL), combining all timeframes of that pair
   const pr = {};
   f.forEach(t => {
-    const k = t.pair + ' (' + t.tf + ')';
-    const o = pr[k] || (pr[k] = {w: 0, l: 0, pair: t.pair, tf: t.tf});
+    const o = pr[t.pair] || (pr[t.pair] = {w: 0, l: 0, tfs: {}});
     if (t.outcome === 'tp') o.w++;
-    if (t.outcome === 'sl') o.l++;
+    if (t.outcome === 'sl') { o.l++; o.tfs[t.tf] = (o.tfs[t.tf] || 0) + 1; }
   });
-  const worst = Object.values(pr).filter(o => o.l > 0)
-    .map(o => ({...o, wr: o.w / (o.w + o.l) * 100}))
+  const worst = Object.entries(pr).filter(([, o]) => o.l > 0)
+    .map(([p, o]) => ({pair: p, wr: o.w / (o.w + o.l) * 100, l: o.l,
+      tf: (Object.entries(o.tfs).sort((a, b) => b[1] - a[1])[0] || ['—'])[0] || '—'}))
     .sort((a, b) => a.wr - b.wr || b.l - a.l)[0];
-  if (worst) L.push(['warn', esc(T('worst')(worst.pair, worst.tf, worst.wr.toFixed(0)))]);
+  if (worst) L.push(['warn', esc(T('worst')(pairRaw(worst.pair), worst.tf, worst.wr.toFixed(0)))]);
 
   const avg = f.reduce((a, t) => a + t.risk, 0) / f.length;
   const hi = f.filter(t => t.risk > avg).length;
@@ -396,45 +483,101 @@ function audit(f) {
   const bp = {};
   f.forEach(t => bp[t.pair] = r2((bp[t.pair] || 0) + pnl(t)));
   const bpE = Object.entries(bp).sort((a, b) => b[1] - a[1])[0];
-  if (bpE) L.push([bpE[1] >= 0 ? 'good' : 'warn', esc(T('bestPair')(bpE[0], fmt(bpE[1])))]);
-  return box(L);
+  if (bpE) L.push([bpE[1] >= 0 ? 'good' : 'warn', esc(T('bestPair')(pairRaw(bpE[0]), fmt(bpE[1])))]);
+
+  // Tilt: 2+ consecutive stop-losses, or any FOMO / Greed trade
+  let run = 0, maxRun = 0;
+  [...f].sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id).forEach(t => { run = t.outcome === 'sl' ? run + 1 : 0; maxRun = Math.max(maxRun, run); });
+  const emoHit = f.filter(t => t.emotions.some(e => /FOMO|Greedy/.test(e))).length;
+  return box(L, maxRun >= 2 || emoHit > 0);
 }
 
 /* ===== Rows ===== */
-function linkCell(t, k, label) {
-  const v = t[k];
-  if (v && !editing.has(t.id + '|' + k))
-    return `<a class="link" href="${safeUrl(v)}" target="_blank" rel="noopener">${esc(label)} ↗</a> <span class="x" data-act="edit" data-key="${t.id}|${k}" title="${esc(T('edit'))}">✎</span>`;
-  return `<input class="url" placeholder="${esc(T('paste'))}" value="${esc(v)}" data-id="${t.id}" data-f="${k}">`;
-}
-function pnlCell(t, p) {
-  if (editing.has(t.id + '|override'))
-    return `<input class="usd" type="text" placeholder="+$150" title="${esc(T('ovTitle'))}" data-id="${t.id}" data-f="override" value="${t.override ?? ''}">`;
-  return `<span class="x ${p >= 0 ? 'pos' : 'neg'}" style="margin:0;font-weight:600" data-act="edit" data-key="${t.id}|override" title="${esc(T('ovTitle'))}">${fmt(p)}</span>`;
-}
+let drawerId = null, periodMode = 'm';
 function rowHTML(t) {
-  const p = pnl(t), strat = t.strategy.join(', ');
-  const emoOpts = emotions.filter(e => !t.emotions.includes(e)).map(e => `<option value="${esc(e)}">${esc(EMO(e))}</option>`).join('');
-  return `<tr>
-    <td><button class="cv" data-act="compare" data-id="${t.id}" title="Chart comparison">📊</button></td>
-    <td><input type="date" class="d" data-id="${t.id}" data-f="date" value="${t.date}"></td>
-    <td><input class="pr" data-id="${t.id}" data-f="pair" value="${esc(t.pair)}"></td>
-    <td><button class="${t.side}" data-act="side" data-id="${t.id}">${t.side === 'L' ? esc(T('long')) : esc(T('short'))}</button></td>
-    <td>${linkCell(t, 'beforeChart', T('cBefore'))}</td>
-    <td>${linkCell(t, 'afterChart', T('cAfter'))}</td>
-    <td><input class="st" title="${esc(strat)}" data-id="${t.id}" data-f="strategy" value="${esc(strat)}" placeholder="${esc(T('strategyPh'))}"></td>
-    <td><input class="c" type="number" step="0.1" min="0" data-id="${t.id}" data-f="risk" value="${t.risk}">%</td>
-    <td>1:<input class="c" style="width:60px" type="number" step="0.1" min="0" data-id="${t.id}" data-f="rr" value="${t.rr}"></td>
-    <td><select class="${t.outcome}" data-id="${t.id}" data-f="outcome">
-      <option value="tp" title="${esc(T('tpFull'))}" ${t.outcome === 'tp' ? 'selected' : ''}>${esc(T('tp'))}</option>
-      <option value="sl" title="${esc(T('slFull'))}" ${t.outcome === 'sl' ? 'selected' : ''}>${esc(T('sl'))}</option>
-      <option value="be" title="${esc(T('beFull'))}" ${t.outcome === 'be' ? 'selected' : ''}>${esc(T('be'))}</option></select></td>
-    <td>${pnlCell(t, p)}</td>
-    <td><input class="tf" list="tfs" data-id="${t.id}" data-f="tf" value="${esc(t.tf)}"></td>
-    <td>${t.emotions.map(e => `<span class="tag">${esc(EMO(e))}<span class="x" data-act="rmemo" data-id="${t.id}" data-v="${esc(e)}">×</span></span>`).join('')}
-      <select data-id="${t.id}" data-f="addemo"><option value="">${esc(T('addEmo'))}</option>${emoOpts}<option value="__new">${esc(T('customEmo'))}</option></select></td>
-    <td><span class="x" data-act="del" data-id="${t.id}" title="${esc(T('del'))}">🗑</span></td>
+  const p = pnl(t), emo = t.emotions[0] ? EMO(t.emotions[0]) : '—', more = t.emotions.length > 1 ? ' +' + (t.emotions.length - 1) : '';
+  return `<tr data-act="drawer" data-id="${t.id}">
+    <td class="stk"><span class="av">${esc(String(t.pair).replace(/(USDT|USDC|USD)$/, '').slice(0, 3))}</span><b>${esc(pairRaw(t.pair))}</b></td>
+    <td><span class="side ${t.side}">${t.side === 'L' ? esc(T('long')) : esc(T('short'))}</span></td>
+    <td class="num ${p >= 0 ? 'pos' : 'neg'}">${esc(fmt(p))}</td>
+    <td><span class="pill ${t.outcome}">${esc(T(t.outcome))}</span></td>
+    <td class="num">${t.risk}%</td>
+    <td class="num">1:${t.rr}</td>
+    <td>${esc(t.tf || '—')}</td>
+    <td>${esc(emo)}${esc(more)}</td>
   </tr>`;
+}
+function drawerHTML() {
+  const t = trades.find(x => x.id === drawerId);
+  if (!t) { drawerId = null; return ''; }
+  const emoOpts = emotions.filter(e => !t.emotions.includes(e)).map(e => `<option value="${esc(e)}">${esc(EMO(e))}</option>`).join('');
+  const opt = (v, l) => `<option value="${v}" ${t.outcome === v ? 'selected' : ''}>${l}</option>`;
+  const open = (k, label) => `<div><span>${esc(label)}</span>${t[k] ? `<a class="link" href="${safeUrl(t[k])}" target="_blank" rel="noopener">Open ↗</a>` : ''}</div>`;
+  return `<div class="dr-back" data-act="drawerclose"></div>
+  <aside class="dr-panel">
+    <div class="dr-head"><b>${esc(pairRaw(t.pair))}</b><span class="side ${t.side}">${t.side === 'L' ? esc(T('long')) : esc(T('short'))}</span><span style="flex:1"></span><button data-act="drawerclose">✕</button></div>
+    <div class="dr-grid">
+      <label>${esc(T('cDate'))}<input type="date" data-id="${t.id}" data-f="date" value="${t.date}"></label>
+      <label>${esc(T('cPair'))}<input data-id="${t.id}" data-f="pair" value="${esc(t.pair)}"></label>
+      <label>${esc(T('cSide'))}<button class="side ${t.side}" data-act="side" data-id="${t.id}">${t.side === 'L' ? esc(T('long')) : esc(T('short'))}</button></label>
+      <label>${esc(T('cOut'))}<select data-id="${t.id}" data-f="outcome">${opt('tp', esc(T('tpFull')))}${opt('sl', esc(T('slFull')))}${opt('be', esc(T('beFull')))}</select></label>
+      <label>${esc(T('cRisk'))} (%)<input type="number" step="0.1" min="0" data-id="${t.id}" data-f="risk" value="${t.risk}"></label>
+      <label>${esc(T('cRR'))}<input type="number" step="0.1" min="0" data-id="${t.id}" data-f="rr" value="${t.rr}"></label>
+      <label>${esc(T('cPnl'))}<input type="text" placeholder="auto" title="${esc(T('ovTitle'))}" data-id="${t.id}" data-f="override" value="${t.override ?? ''}"></label>
+      <label>${esc(T('cTf'))}<input list="tfs" data-id="${t.id}" data-f="tf" value="${esc(t.tf)}"></label>
+      <label class="full">${esc(T('cStrat'))}<input data-id="${t.id}" data-f="strategy" value="${esc(t.strategy.join(', '))}" placeholder="${esc(T('strategyPh'))}"></label>
+    </div>
+    <div class="dr-links">
+      ${open('beforeChart', T('cBefore'))}
+      <input data-id="${t.id}" data-f="beforeChart" value="${esc(t.beforeChart)}" placeholder="${esc(T('paste'))}">
+      ${open('afterChart', T('cAfter'))}
+      <input data-id="${t.id}" data-f="afterChart" value="${esc(t.afterChart)}" placeholder="${esc(T('paste'))}">
+    </div>
+    <div class="dr-emo">${t.emotions.map(e => `<span class="tag">${esc(EMO(e))}<span class="x" data-act="rmemo" data-id="${t.id}" data-v="${esc(e)}">×</span></span>`).join('')}
+      <select data-id="${t.id}" data-f="addemo"><option value="">${esc(T('addEmo'))}</option>${emoOpts}<option value="__new">${esc(T('customEmo'))}</option></select></div>
+    <div class="dr-actions"><button class="p" data-act="compare" data-id="${t.id}">📊 Chart view</button><button class="dr-del" data-act="del" data-id="${t.id}">${esc(T('del'))}</button></div>
+  </aside>`;
+}
+function traderScore(all, wr, avgRR) {
+  if (!all.length) return 0;
+  const disc = Math.min(avgRR / 2, 1) * 100;
+  const bad = all.filter(t => t.emotions.some(e => /FOMO|Greedy/.test(e))).length;
+  const emo = (1 - bad / all.length) * 100;
+  return Math.max(0, Math.min(100, Math.round(0.5 * wr + 0.25 * disc + 0.25 * emo)));
+}
+function heroHTML() {
+  const net = r2(trades.reduce((a, t) => a + pnl(t), 0));
+  const wins = trades.filter(t => t.outcome === 'tp').length, losses = trades.filter(t => t.outcome === 'sl').length;
+  const wr = wins + losses ? wins / (wins + losses) * 100 : 0;
+  const avgRR = trades.length ? trades.reduce((a, t) => a + (+t.rr || 0), 0) / trades.length : 0;
+  const score = traderScore(trades, wr, avgRR);
+  const card = (label, val, cls = '') => `<div class="card hk"><span>${esc(label)}</span><b class="${cls}">${val}</b></div>`;
+  const C = 113.1, ring = `<svg class="ring" viewBox="0 0 44 44" width="44" height="44"><circle cx="22" cy="22" r="18" stroke="#222531" stroke-width="4" fill="none"/><circle cx="22" cy="22" r="18" stroke="#3861FB" stroke-width="4" fill="none" stroke-linecap="round" stroke-dasharray="${(score * C / 100).toFixed(1)} ${C}" transform="rotate(-90 22 22)"/><text x="22" y="26" text-anchor="middle" font-size="12" fill="#FFFFFF">${score}</text></svg>`;
+  return card(T('balance'), '$' + BALANCE.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}))
+    + card(T('kNet'), esc(fmt(net)), net >= 0 ? 'pos' : 'neg')
+    + card(T('kWin'), wr.toFixed(1) + '%')
+    + card('Avg R:R', '1:' + avgRR.toFixed(2))
+    + `<div class="card hk score"><div><span>Trader Score</span><br><b style="font-size:16px">${score}/100</b></div>${ring}</div>`;
+}
+function periodCard() {
+  const g = group(periodMode === 'm' ? t => t.date.slice(0, 7) : t => t.date.slice(0, 4));
+  return `<div class="card"><div class="bar" style="justify-content:space-between"><b>${esc(periodMode === 'm' ? T('monthly') : T('annual'))}</b>
+    <div class="ptabs"><button class="${periodMode === 'm' ? 'on' : ''}" data-act="ptab" data-m="m">${esc(T('monthly'))}</button><button class="${periodMode === 'y' ? 'on' : ''}" data-act="ptab" data-m="y">${esc(T('annual'))}</button></div></div>
+    <table style="table-layout:auto;margin-top:6px"><tr><th>${esc(T('period'))}</th><th>${esc(T('cTrades'))}</th><th>${esc(T('cPnl'))}</th></tr>
+    ${g.map(([k, v]) => `<tr><td>${k}</td><td>${v.n}</td><td class="${v.p >= 0 ? 'pos' : 'neg'}">${esc(fmt(v.p))}</td></tr>`).join('')}</table></div>`;
+}
+function calHTML(m, f) {
+  const [y, mo] = m.split('-').map(Number), days = new Date(y, mo, 0).getDate();
+  const first = (new Date(y, mo - 1, 1).getDay() + 6) % 7;
+  const by = {};
+  f.forEach(t => { const d = +t.date.slice(8, 10); const o = by[d] || (by[d] = {p: 0, n: 0}); o.p = r2(o.p + pnl(t)); o.n++; });
+  let cells = '';
+  for (let i = 0; i < first; i++) cells += '<div></div>';
+  for (let d = 1; d <= days; d++) {
+    const o = by[d], cls = !o ? 'cal' : o.p > 0 ? 'cal win' : o.p < 0 ? 'cal loss' : 'cal';
+    cells += `<div class="${cls}"><span class="dn">${d}</span>${o ? `<b class="${o.p >= 0 ? 'pos' : 'neg'}">${esc(fmt(o.p))}</b><small>${o.n} ${esc(T('cTrades').toLowerCase())}</small>` : ''}</div>`;
+  }
+  return `<div class="calgrid">${['Mo','Tu','We','Th','Fr','Sa','Su'].map(w => `<div class="wd">${w}</div>`).join('')}${cells}</div>`;
 }
 
 /* ===== One isolated monthly block ===== */
@@ -457,19 +600,18 @@ function block(m) {
     <div class="kpis">
       <div>${esc(T('kTrades'))}<b>${n}</b></div>
       <div>${esc(T('kWin'))}<b>${wr.toFixed(1)}%</b></div>
-      <div>${esc(T('kNet'))}<b class="${net >= 0 ? 'pos' : 'neg'}">${fmt(net)}</b></div>
+      <div>${esc(T('kNet'))}<b class="${net >= 0 ? 'pos' : 'neg'}">${esc(fmt(net))}</b></div>
       <div>${esc(T('kAvg'))}<b>${avgR.toFixed(2)}R</b></div>
     </div>
     <div class="charts">${charts(f)}</div>
     ${audit(f)}
-    <div class="tw"><table>
+    ${calHTML(m, f)}
+    <div class="tw"><table class="ctab">
       <thead><tr>
-        <th style="width:40px"></th><th style="width:66px">${esc(T('cDate'))}</th><th style="width:78px">${esc(T('cPair'))}</th><th style="width:58px">${esc(T('cSide'))}</th>
-        <th style="width:62px">${esc(T('cBefore'))}</th><th style="width:56px">${esc(T('cAfter'))}</th><th>${esc(T('cStrat'))}</th>
-        <th style="width:56px">${esc(T('cRisk'))}</th><th style="width:64px">${esc(T('cRR'))}</th><th style="width:86px">${esc(T('cOut'))}</th>
-        <th style="width:96px">${esc(T('cPnl'))}</th><th style="width:50px">${esc(T('cTf'))}</th><th style="width:200px">${esc(T('cEmo'))}</th><th style="width:28px"></th>
+        <th class="stk">${esc(T('cPair'))}</th><th>${esc(T('cSide'))}</th><th class="num">${esc(T('cPnl'))}</th><th>${esc(T('cOut'))}</th>
+        <th class="num">${esc(T('cRisk'))}</th><th class="num">${esc(T('cRR'))}</th><th>${esc(T('cTf'))}</th><th>${esc(T('cEmo'))}</th>
       </tr></thead>
-      <tbody>${f.map(rowHTML).join('') || `<tr><td colspan="14" class="sub" style="padding:16px">${esc(T('noRows'))}</td></tr>`}</tbody>
+      <tbody>${f.map(rowHTML).join('') || `<tr><td colspan="8" class="sub" style="padding:16px">${esc(T('noRows'))}</td></tr>`}</tbody>
     </table></div>
   </section>`;
 }
@@ -487,7 +629,9 @@ function periodTable(title, g) {
 }
 
 function render() {
-  $('#periods').innerHTML = periodTable(T('monthly'), group(t => t.date.slice(0, 7))) + periodTable(T('annual'), group(t => t.date.slice(0, 4)));
+  $('#hero').innerHTML = heroHTML();
+  $('#periods').innerHTML = periodCard();
+  $('#drawer').innerHTML = drawerHTML();
   $('#months').innerHTML = allMonths().map(block).join('');
   $('#lang').querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.l === lang));
   $('#bal').value = BALANCE;
@@ -650,6 +794,9 @@ document.addEventListener('click', e => {
   if (e.target.closest('#newmonth')) { startMonth(); return; }
   const a = e.target.closest('[data-act]'); if (!a) return;
   const act = a.dataset.act;
+  if (act === 'drawer') { if (e.target.closest('input,select,textarea,button')) return; drawerId = +a.dataset.id; render(); return; }
+  if (act === 'drawerclose') { drawerId = null; render(); return; }
+  if (act === 'ptab') { periodMode = a.dataset.m; render(); return; }
   if (act === 'compare') { openCompare(+a.dataset.id); return; }
   if (act === 'edit') { editing.add(a.dataset.key); render(); return; }
   if (act === 'analyze') { const m = a.dataset.m; hl.has(m) ? hl.delete(m) : hl.add(m); render(); return; }
