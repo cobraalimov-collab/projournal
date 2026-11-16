@@ -308,6 +308,8 @@ svg.eqc{cursor:crosshair}
 .ctab th.w-chart{background:#2962FF;color:#ffffff}
 .ctab td.chart-c{padding:0 6px}
 .tvmini{width:130px;height:42px;margin:0 auto;overflow:hidden}
+.spark{width:120px;height:36px;margin:0 auto;overflow:hidden;background:transparent}
+.spark-svg{width:120px!important;height:36px!important;display:block;background:transparent;overflow:visible}
 .brand-row{display:flex;align-items:center;gap:12px}
 .brand-row h1{margin:0}
 .brand-row-c{justify-content:center;margin-bottom:8px}
@@ -320,6 +322,32 @@ svg.eqc{cursor:crosshair}
 .pb-head{display:block}
 .pb-row1{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%}
 .pb-row2{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.rb-wrap{padding:12px;margin-bottom:14px}
+.rb-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.rb-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.rb-live{font-size:11px;font-weight:700;color:#16c784}
+.rb-meta{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rb-stat{font-size:11px;color:var(--mut)}
+.rb-btn{background:var(--input);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer}
+.rb-btn:disabled{opacity:.5;cursor:default}
+.rb-pulse{display:inline-block;width:9px;height:9px;border-radius:50%;background:#16c784;animation:rbPulse 1.6s infinite}
+.rb-pulse.off{background:#94a3b8;animation:none}
+@keyframes rbPulse{0%{box-shadow:0 0 0 0 rgba(22,199,132,.6)}70%{box-shadow:0 0 0 8px rgba(22,199,132,0)}100%{box-shadow:0 0 0 0 rgba(22,199,132,0)}}
+.rb-row-h{display:flex;flex-wrap:nowrap;gap:10px;overflow-x:auto;padding-bottom:6px}
+.rb-card{flex:0 0 210px;min-width:210px;margin:0;padding:12px;display:flex;flex-direction:column;gap:6px;font-size:12px}
+.rb-top{display:flex;justify-content:space-between;align-items:center;font-size:14px;font-weight:600}
+.rb-score{color:#16c784;font-weight:700}
+.rb-price{font-size:16px;font-weight:700}
+.rb-badge{align-self:flex-start;font-size:11px;font-weight:600;color:#16c784;background:rgba(22,199,132,.12);border-radius:999px;padding:2px 8px}
+.rb-kv{display:flex;justify-content:space-between;gap:8px;color:var(--mut)}
+.rb-kv b{color:var(--txt)}
+.rb-kv b.neg{color:#ea3943}
+.rb-foot{font-size:11px;color:var(--mut);margin-top:10px}
+.rb-rank{font-size:11px;font-weight:700;color:var(--mut);background:var(--tag);border-radius:6px;padding:2px 6px}
+.rb-chg{font-size:12px;font-weight:600}
+.rb-sig{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.rb-tv{margin-top:auto;display:block;text-align:center;color:var(--acc);text-decoration:none;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font-size:12px;font-weight:600}
+.rb-tv:hover{border-color:var(--acc)}
 </style></head>
 <body>
 <div id="app">
@@ -404,7 +432,7 @@ const I18N = {
     badLink:'Please paste a full https:// link', badFile:'Invalid journal file',
     buy:'Buy Access', questions:'Questions:', tg:'Telegram DM', gateSub:'Track every trade, measure your edge, never lose your data.',
     lic:'Enter license key', unlock:'Unlock', badKey:'Invalid key. Check your receipt or DM for access.',
-    traderScore:'Trader Score', avgRR:'Avg R:R', chartView:'📊 Chart view', openLink:'Open ↗', weekdays:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], auto:'auto', upload:'⬆ Upload / Paste', removeImg:'✕ Remove', clickPanel:'Click panel, then Ctrl+V', pasteTarget:'Paste target: ', noTv:'No TradingView link added', openTv:'Open in TradingView ↗', close:'Close (X) ✕', alertAmount:'Enter an amount like +$150 or -$50', alertStorage:'Browser storage is full. Remove an image or export and clear older data.', alertRead:'Could not read that image.', extNote:'Note: External images are blocked in Claude preview — open the published app in a browser tab to view your exact link snapshot.', lblBefore:'BEFORE (OLDIN / DO) — Entry', lblAfter:'AFTER (KEYIN / POSLE) — Result (TP / SL)', themeTitle:'Dark / Light', scTitle:'1H Spot SMC Entry Setups', scRefresh:'Refresh', scLoading:'Loading data from Binance…', scNone:'No matching setups right now.', scError:'Could not load data. Try again.', scEntry:'Entry zone', scSL:'Stop Loss', scTarget:'Target', scTrend:'1H Uptrend', scZone:'Discount Zone', scSweep:'Liquidity Swept', scDisc:'Educational only. Not financial advice.', scPill:'Live 1H SMC scanner runs automatically on GitHub / in the browser', equity:'Equity', startCap:'Starting capital', vsCap:'vs. starting capital', startLbl:'Start', tPnl:'Trade P&L', tBal:'New balance', tGrowth:'Capital growth', newTitle:'New trade', pairPh:'e.g. SOL/USDT', noteLbl:'Notes', notePh:'Setup notes, mistakes, lessons…', cancel:'Cancel', save:'Save', needPair:'Enter the pair (e.g. SOL/USDT).', needSide:'Choose LONG or SHORT.', needOut:'Choose TP, SL or BE.', needNum:'Enter risk % and R:R.', curCap:'Current capital', pf:'Profit Factor', maxDD:'Max drawdown', capLegend:'Capital %', emoLegend:'Emotion', emoScore:'Discipline', riskCalc:'Risk Calculator', checklist:'Pre-Trade Checklist', rcCap:'Capital ($)', rcEntry:'Entry price', rcStop:'Stop-loss price', rcTarget:'Take-profit price (optional)', rcRiskUsd:'Risk ($)', rcCoins:'Position size (coins)', rcPos:'Position size ($)', rcNeed:'Enter capital, risk, entry and stop price.', ck1:'1H uptrend / BOS confirmed', ck2:'Price in discount zone (0.5–0.786)', ck3:'Liquidity swept', ck4:'Stop-loss below swing low', ck5:'Calm emotion / no FOMO', ckDone:'All checks confirmed — you can enter', gBadge:'🔒 Restricted access', gTitle:'alimovaura Journal', gSub:'Manage your trades with discipline and see your real result.', gF1:'📈 Emotion curve', gF2:'📊 Monthly USD stats', gF3:'♾️ Unlimited trade log', gPrice:'$50 — Lifetime Access', gPriceSub:'(Lifetime Access)', gPay:'💳 Pay by card ($50)', gCrypto:'🪙 Pay with crypto USDT ($50)', emoTitle:'Emotions Line', noEmo:'No emotions recorded', chart7d:'CHART (7D)', tilt:'Tilt alert: consecutive losses or FOMO/Greed trades detected. Take a cooldown break before your next entry.', auditTitle:'Monthly AI Audit & Mistake Analysis', noData:'No trades to analyze yet.', noLoss:'No losing trades this month. Strong discipline.',
+    traderScore:'Trader Score', avgRR:'Avg R:R', chartView:'📊 Chart view', openLink:'Open ↗', weekdays:['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'], auto:'auto', upload:'⬆ Upload / Paste', removeImg:'✕ Remove', clickPanel:'Click panel, then Ctrl+V', pasteTarget:'Paste target: ', noTv:'No TradingView link added', openTv:'Open in TradingView ↗', close:'Close (X) ✕', alertAmount:'Enter an amount like +$150 or -$50', alertStorage:'Browser storage is full. Remove an image or export and clear older data.', alertRead:'Could not read that image.', extNote:'Note: External images are blocked in Claude preview — open the published app in a browser tab to view your exact link snapshot.', lblBefore:'BEFORE (OLDIN / DO) — Entry', lblAfter:'AFTER (KEYIN / POSLE) — Result (TP / SL)', themeTitle:'Dark / Light', scTitle:'1H Spot SMC Entry Setups', scRefresh:'Refresh', rbOn:'Robot live', rbScanning:'SMC Robot: Bozor tahlil qilinmoqda...', rbReady:'Top 10 1H SMC Entry tayyor', rbTv:'View on TradingView ↗', rbAuto:'Auto-refresh every 5 min', rbRescan:'Refresh', rbUpdated:'Updated', scLoading:'Loading data from Binance…', scNone:'No matching setups right now.', scError:'Could not load data. Try again.', scEntry:'Entry zone', scSL:'Stop Loss', scTarget:'Target', scTrend:'1H Uptrend', scZone:'Discount Zone', scSweep:'Liquidity Swept', scDisc:'Educational only. Not financial advice.', scPill:'Live 1H SMC scanner runs automatically on GitHub / in the browser', equity:'Equity', startCap:'Starting capital', vsCap:'vs. starting capital', startLbl:'Start', tPnl:'Trade P&L', tBal:'New balance', tGrowth:'Capital growth', newTitle:'New trade', pairPh:'e.g. SOL/USDT', noteLbl:'Notes', notePh:'Setup notes, mistakes, lessons…', cancel:'Cancel', save:'Save', needPair:'Enter the pair (e.g. SOL/USDT).', needSide:'Choose LONG or SHORT.', needOut:'Choose TP, SL or BE.', needNum:'Enter risk % and R:R.', curCap:'Current capital', pf:'Profit Factor', maxDD:'Max drawdown', capLegend:'Capital %', emoLegend:'Emotion', emoScore:'Discipline', riskCalc:'Risk Calculator', checklist:'Pre-Trade Checklist', rcCap:'Capital ($)', rcEntry:'Entry price', rcStop:'Stop-loss price', rcTarget:'Take-profit price (optional)', rcRiskUsd:'Risk ($)', rcCoins:'Position size (coins)', rcPos:'Position size ($)', rcNeed:'Enter capital, risk, entry and stop price.', ck1:'1H uptrend / BOS confirmed', ck2:'Price in discount zone (0.5–0.786)', ck3:'Liquidity swept', ck4:'Stop-loss below swing low', ck5:'Calm emotion / no FOMO', ckDone:'All checks confirmed — you can enter', gBadge:'🔒 Restricted access', gTitle:'alimovaura Journal', gSub:'Manage your trades with discipline and see your real result.', gF1:'📈 Emotion curve', gF2:'📊 Monthly USD stats', gF3:'♾️ Unlimited trade log', gPrice:'$50 — Lifetime Access', gPriceSub:'(Lifetime Access)', gPay:'💳 Pay by card ($50)', gCrypto:'🪙 Pay with crypto USDT ($50)', emoTitle:'Emotions Line', noEmo:'No emotions recorded', chart7d:'CHART (24H)', tilt:'Tilt alert: consecutive losses or FOMO/Greed trades detected. Take a cooldown break before your next entry.', auditTitle:'Monthly AI Audit & Mistake Analysis', noData:'No trades to analyze yet.', noLoss:'No losing trades this month. Strong discipline.',
     emoLoss:(e,n,p)=>`Trades opened in ${e} state: ${n} losing, costing ${p}`,
     worst:(pr,tf,w)=>`${pr} (${tf}) has the most stop-losses, win rate ${w}%`,
     riskHi:(n,a)=>`${n} trade(s) risked more than your monthly average of ${a}%`,
@@ -427,7 +455,7 @@ const I18N = {
     badLink:'Вставьте полную ссылку https://', badFile:'Неверный файл журнала',
     buy:'Купить доступ', questions:'Вопросы:', tg:'Telegram', gateSub:'Ведите учёт каждой сделки и никогда не теряйте данные.',
     lic:'Введите лицензионный ключ', unlock:'Открыть', badKey:'Неверный ключ. Проверьте чек или напишите нам.',
-    traderScore:'Рейтинг трейдера', avgRR:'Средний R:R', chartView:'📊 Просмотр графика', openLink:'Открыть ↗', weekdays:['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'], auto:'авто', upload:'⬆ Загрузить / Вставить', removeImg:'✕ Удалить', clickPanel:'Нажмите на панель, затем Ctrl+V', pasteTarget:'Куда вставить: ', noTv:'Ссылка TradingView не добавлена', openTv:'Открыть в TradingView ↗', close:'Закрыть (X) ✕', alertAmount:'Введите сумму в $, например +$150 или -$50', alertStorage:'Память браузера заполнена. Удалите изображение или экспортируйте и очистите старые данные.', alertRead:'Не удалось прочитать это изображение.', extNote:'Примечание: внешние изображения заблокированы в превью Claude. Откройте опубликованное приложение в браузере, чтобы увидеть снимок вашей ссылки.', lblBefore:'ДО (Вход)', lblAfter:'ПОСЛЕ (Результат TP / SL)', themeTitle:'Тёмная / светлая', scTitle:'1Ч Спот SMC Точки входа', scRefresh:'Обновить', scLoading:'Загрузка данных с Binance…', scNone:'Подходящих сетапов сейчас нет.', scError:'Не удалось загрузить данные. Попробуйте снова.', scEntry:'Зона входа', scSL:'Стоп-лосс', scTarget:'Цель', scTrend:'1Ч аптренд', scZone:'Дисконт-зона', scSweep:'Ликвидность снята', scDisc:'Только для обучения. Не финансовая рекомендация.', scPill:'Живой 1Ч SMC сканер работает автоматически на GitHub / в браузере', equity:'Баланс счёта', startCap:'Стартовый капитал', vsCap:'от капитала', startLbl:'Старт', tPnl:'P&L сделки', tBal:'Новый баланс', tGrowth:'Рост капитала', newTitle:'Новая сделка', pairPh:'Например: SOL/USDT', noteLbl:'Заметки', notePh:'Заметки по сетапу, ошибки, выводы…', cancel:'Отмена', save:'Сохранить', needPair:'Укажите пару (например SOL/USDT).', needSide:'Выберите LONG или SHORT.', needOut:'Выберите TP, SL или BE.', needNum:'Укажите риск % и R:R.', curCap:'Текущий капитал', pf:'Profit Factor', maxDD:'Макс. просадка', capLegend:'Капитал %', emoLegend:'Эмоции', emoScore:'Дисциплина', riskCalc:'Калькулятор риска', checklist:'Чек-лист сделки', rcCap:'Капитал ($)', rcEntry:'Цена входа', rcStop:'Цена стопа', rcTarget:'Цена тейка (необязательно)', rcRiskUsd:'Риск ($)', rcCoins:'Размер позиции (монеты)', rcPos:'Размер позиции ($)', rcNeed:'Введите капитал, риск, цену входа и стопа.', ck1:'1Ч аптренд / BOS подтверждён', ck2:'Цена в дисконт-зоне (0.5–0.786)', ck3:'Ликвидность снята (sweep)', ck4:'Стоп под свинг-лоу', ck5:'Спокойствие / без FOMO', ckDone:'Все пункты подтверждены — можно входить', gBadge:'🔒 Ограниченный доступ', gTitle:'alimovaura Journal', gSub:'Управляйте сделками с дисциплиной и видите реальный результат.', gF1:'📈 Линия эмоций', gF2:'📊 Месячная статистика в USD', gF3:'♾️ Безлимитный журнал сделок', gPrice:'$50 — Пожизненный доступ', gPriceSub:'(пожизненный доступ)', gPay:'💳 Оплата картой ($50)', gCrypto:'🪙 Оплата криптой USDT ($50)', emoTitle:'Линия эмоций', noEmo:'Эмоции не записаны', chart7d:'ГРАФИК (7Д)', tilt:'Внимание: серия убытков или сделки FOMO/жадность. Сделайте перерыв перед следующим входом.', auditTitle:'Ежемесячный AI-аудит и разбор ошибок', noData:'Пока нет сделок для анализа.', noLoss:'В этом месяце нет убыточных сделок. Отличная дисциплина.',
+    traderScore:'Рейтинг трейдера', avgRR:'Средний R:R', chartView:'📊 Просмотр графика', openLink:'Открыть ↗', weekdays:['Понедельник','Вторник','Среда','Четверг','Пятница','Суббота','Воскресенье'], auto:'авто', upload:'⬆ Загрузить / Вставить', removeImg:'✕ Удалить', clickPanel:'Нажмите на панель, затем Ctrl+V', pasteTarget:'Куда вставить: ', noTv:'Ссылка TradingView не добавлена', openTv:'Открыть в TradingView ↗', close:'Закрыть (X) ✕', alertAmount:'Введите сумму в $, например +$150 или -$50', alertStorage:'Память браузера заполнена. Удалите изображение или экспортируйте и очистите старые данные.', alertRead:'Не удалось прочитать это изображение.', extNote:'Примечание: внешние изображения заблокированы в превью Claude. Откройте опубликованное приложение в браузере, чтобы увидеть снимок вашей ссылки.', lblBefore:'ДО (Вход)', lblAfter:'ПОСЛЕ (Результат TP / SL)', themeTitle:'Тёмная / светлая', scTitle:'1Ч Спот SMC Точки входа', scRefresh:'Обновить', rbOn:'Робот активен', rbScanning:'SMC Робот: анализ рынка...', rbReady:'Топ-10 1H SMC Entry готов', rbTv:'Открыть в TradingView ↗', rbAuto:'Автообновление каждые 5 мин', rbRescan:'Обновить', rbUpdated:'Обновлено', scLoading:'Загрузка данных с Binance…', scNone:'Подходящих сетапов сейчас нет.', scError:'Не удалось загрузить данные. Попробуйте снова.', scEntry:'Зона входа', scSL:'Стоп-лосс', scTarget:'Цель', scTrend:'1Ч аптренд', scZone:'Дисконт-зона', scSweep:'Ликвидность снята', scDisc:'Только для обучения. Не финансовая рекомендация.', scPill:'Живой 1Ч SMC сканер работает автоматически на GitHub / в браузере', equity:'Баланс счёта', startCap:'Стартовый капитал', vsCap:'от капитала', startLbl:'Старт', tPnl:'P&L сделки', tBal:'Новый баланс', tGrowth:'Рост капитала', newTitle:'Новая сделка', pairPh:'Например: SOL/USDT', noteLbl:'Заметки', notePh:'Заметки по сетапу, ошибки, выводы…', cancel:'Отмена', save:'Сохранить', needPair:'Укажите пару (например SOL/USDT).', needSide:'Выберите LONG или SHORT.', needOut:'Выберите TP, SL или BE.', needNum:'Укажите риск % и R:R.', curCap:'Текущий капитал', pf:'Profit Factor', maxDD:'Макс. просадка', capLegend:'Капитал %', emoLegend:'Эмоции', emoScore:'Дисциплина', riskCalc:'Калькулятор риска', checklist:'Чек-лист сделки', rcCap:'Капитал ($)', rcEntry:'Цена входа', rcStop:'Цена стопа', rcTarget:'Цена тейка (необязательно)', rcRiskUsd:'Риск ($)', rcCoins:'Размер позиции (монеты)', rcPos:'Размер позиции ($)', rcNeed:'Введите капитал, риск, цену входа и стопа.', ck1:'1Ч аптренд / BOS подтверждён', ck2:'Цена в дисконт-зоне (0.5–0.786)', ck3:'Ликвидность снята (sweep)', ck4:'Стоп под свинг-лоу', ck5:'Спокойствие / без FOMO', ckDone:'Все пункты подтверждены — можно входить', gBadge:'🔒 Ограниченный доступ', gTitle:'alimovaura Journal', gSub:'Управляйте сделками с дисциплиной и видите реальный результат.', gF1:'📈 Линия эмоций', gF2:'📊 Месячная статистика в USD', gF3:'♾️ Безлимитный журнал сделок', gPrice:'$50 — Пожизненный доступ', gPriceSub:'(пожизненный доступ)', gPay:'💳 Оплата картой ($50)', gCrypto:'🪙 Оплата криптой USDT ($50)', emoTitle:'Линия эмоций', noEmo:'Эмоции не записаны', chart7d:'ГРАФИК (24Ч)', tilt:'Внимание: серия убытков или сделки FOMO/жадность. Сделайте перерыв перед следующим входом.', auditTitle:'Ежемесячный AI-аудит и разбор ошибок', noData:'Пока нет сделок для анализа.', noLoss:'В этом месяце нет убыточных сделок. Отличная дисциплина.',
     emoLoss:(e,n,p)=>`Сделки в состоянии «${e}»: ${n} убыточных, итог ${p}`,
     worst:(pr,tf,w)=>`${pr} (${tf}) — больше всего стопов, винрейт ${w}%`,
     riskHi:(n,a)=>`${n} сделок с риском выше среднего за месяц (${a}%)`,
@@ -450,7 +478,7 @@ const I18N = {
     badLink:'To’liq https:// havolasini kiriting', badFile:'Noto’g’ri fayl',
     buy:'Kirish huquqini sotib olish', questions:'Savollar:', tg:'Telegram', gateSub:'Har bir savdoni kuzating va ma’lumotlaringizni yo’qotmang.',
     lic:'Litsenziya kalitini kiriting', unlock:'Ochish', badKey:'Kalit noto’g’ri. Kvitansiyani tekshiring yoki yozing.',
-    traderScore:'Treyder balli', avgRR:'O‘rtacha R:R', chartView:'📊 Grafik ko‘rinishi', openLink:'Ochish ↗', weekdays:['Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba','Yakshanba'], auto:'avto', upload:'⬆ Yuklash / Joylash', removeImg:'✕ Olib tashlash', clickPanel:'Panelni bosing, so‘ng Ctrl+V', pasteTarget:'Joylash joyi: ', noTv:'TradingView havolasi kiritilmagan', openTv:'TradingView’da ochish ↗', close:'Yopish (X) ✕', alertAmount:'$ miqdorini kiriting, masalan +$150 yoki -$50', alertStorage:'Brauzer xotirasi to‘ldi. Rasmni o‘chiring yoki eski ma’lumotlarni eksport qilib tozalang.', alertRead:'Bu rasmni o‘qib bo‘lmadi.', extNote:'Eslatma: tashqi rasmlar Claude ko‘rinishida bloklangan. Aniq havolani ko‘rish uchun ilovani brauzerda oching.', lblBefore:'OLDIN (Kirish)', lblAfter:'KEYIN (Natija)', themeTitle:'Mavzu', scTitle:'1S Spot SMC Imkoniyatlar', scRefresh:'Yangilash', scLoading:'Binance’dan ma’lumot olinmoqda…', scNone:'Hozir mos setup yo‘q.', scError:'Ma’lumotni olib bo‘lmadi. Qayta urinib ko‘ring.', scEntry:'Kirish zonasi', scSL:'Stop-loss', scTarget:'Maqsad', scTrend:'1S Uptrend', scZone:'Discount zona', scSweep:'Likvidlik olindi', scDisc:'Faqat ta’lim uchun. Moliyaviy maslahat emas.', scPill:'Jonli 1H SMC skaner GitHub / brauzerda avtomatik ishlaydi', equity:'Hisob balansi', startCap:'Boshlang‘ich kapital', vsCap:'kapitalga nisbatan', startLbl:'Boshlanish', tPnl:'Savdo P&L', tBal:'Yangi balans', tGrowth:'Kapital o‘sishi', newTitle:'Yangi savdo', pairPh:'Masalan: SOL/USDT', noteLbl:'Izoh', notePh:'Setup izohi, xatolar, xulosalar…', cancel:'Bekor qilish', save:'Saqlash', needPair:'Juftlikni kiriting (masalan SOL/USDT).', needSide:'LONG yoki SHORT ni tanlang.', needOut:'TP, SL yoki BE ni tanlang.', needNum:'Risk % va R:R ni kiriting.', curCap:'Joriy kapital', pf:'Profit Factor', maxDD:'Maks. drawdown', capLegend:'Kapital %', emoLegend:'Emotsiya', emoScore:'Intizom', riskCalc:'Risk kalkulyator', checklist:'Savdo chek-listi', rcCap:'Kapital ($)', rcEntry:'Kirish narxi', rcStop:'Stop-loss narxi', rcTarget:'Take-profit narxi (ixtiyoriy)', rcRiskUsd:'Risk ($)', rcCoins:'Pozitsiya (coin)', rcPos:'Pozitsiya ($)', rcNeed:'Kapital, risk, kirish va stop narxini kiriting.', ck1:'1H uptrend / BOS tasdiqlangan', ck2:'Narx discount zonada (0.5–0.786)', ck3:'Likvidlik olindi (sweep)', ck4:'Stop-loss swing low ostida', ck5:'Xotirjam emotsiya / FOMO yo‘q', ckDone:'Hammasi tasdiqlandi — kirishingiz mumkin', gBadge:'🔒 Cheklangan kirish', gTitle:'alimovaura Journal', gSub:"Savdolaringizni intizom bilan boshqaring va natijangizni aniq ko'ring.", gF1:'📈 Hissiyot liniyasi', gF2:'📊 Oylik USD statistika', gF3:'♾️ Cheksiz savdo jadvali', gPrice:'$50 — Umrbod Kirish', gPriceSub:'(Lifetime Access)', gPay:"💳 Karta orqali to'lash ($50)", gCrypto:"🪙 Kripto (USDT) orqali to'lash ($50)", emoTitle:'Emotsiyalar liniyasi', noEmo:'Hissiyotlar yozilmagan', chart7d:'GRAFIK (7K)', tilt:'Ogohlantirish: ketma-ket zarar yoki FOMO/Ochko’zlik savdolari aniqlandi. Keyingi kirishdan oldin tanaffus qiling.', auditTitle:'Oylik AI audit va xatolar tahlili', noData:'Tahlil uchun hali savdo yo’q.', noLoss:'Bu oyda zararli savdo yo’q. Ajoyib intizom.',
+    traderScore:'Treyder balli', avgRR:'O‘rtacha R:R', chartView:'📊 Grafik ko‘rinishi', openLink:'Ochish ↗', weekdays:['Dushanba','Seshanba','Chorshanba','Payshanba','Juma','Shanba','Yakshanba'], auto:'avto', upload:'⬆ Yuklash / Joylash', removeImg:'✕ Olib tashlash', clickPanel:'Panelni bosing, so‘ng Ctrl+V', pasteTarget:'Joylash joyi: ', noTv:'TradingView havolasi kiritilmagan', openTv:'TradingView’da ochish ↗', close:'Yopish (X) ✕', alertAmount:'$ miqdorini kiriting, masalan +$150 yoki -$50', alertStorage:'Brauzer xotirasi to‘ldi. Rasmni o‘chiring yoki eski ma’lumotlarni eksport qilib tozalang.', alertRead:'Bu rasmni o‘qib bo‘lmadi.', extNote:'Eslatma: tashqi rasmlar Claude ko‘rinishida bloklangan. Aniq havolani ko‘rish uchun ilovani brauzerda oching.', lblBefore:'OLDIN (Kirish)', lblAfter:'KEYIN (Natija)', themeTitle:'Mavzu', scTitle:'1S Spot SMC Imkoniyatlar', scRefresh:'Yangilash', rbOn:'Robot faol', rbScanning:'SMC Robot: Bozor tahlil qilinmoqda...', rbReady:'Top 10 1H SMC Entry tayyor', rbTv:"TradingView'da ko'rish ↗", rbAuto:'Har 5 daqiqada avtomatik yangilanadi', rbRescan:'Yangilash', rbUpdated:'Yangilandi', scLoading:'Binance’dan ma’lumot olinmoqda…', scNone:'Hozir mos setup yo‘q.', scError:'Ma’lumotni olib bo‘lmadi. Qayta urinib ko‘ring.', scEntry:'Kirish zonasi', scSL:'Stop-loss', scTarget:'Maqsad', scTrend:'1S Uptrend', scZone:'Discount zona', scSweep:'Likvidlik olindi', scDisc:'Faqat ta’lim uchun. Moliyaviy maslahat emas.', scPill:'Jonli 1H SMC skaner GitHub / brauzerda avtomatik ishlaydi', equity:'Hisob balansi', startCap:'Boshlang‘ich kapital', vsCap:'kapitalga nisbatan', startLbl:'Boshlanish', tPnl:'Savdo P&L', tBal:'Yangi balans', tGrowth:'Kapital o‘sishi', newTitle:'Yangi savdo', pairPh:'Masalan: SOL/USDT', noteLbl:'Izoh', notePh:'Setup izohi, xatolar, xulosalar…', cancel:'Bekor qilish', save:'Saqlash', needPair:'Juftlikni kiriting (masalan SOL/USDT).', needSide:'LONG yoki SHORT ni tanlang.', needOut:'TP, SL yoki BE ni tanlang.', needNum:'Risk % va R:R ni kiriting.', curCap:'Joriy kapital', pf:'Profit Factor', maxDD:'Maks. drawdown', capLegend:'Kapital %', emoLegend:'Emotsiya', emoScore:'Intizom', riskCalc:'Risk kalkulyator', checklist:'Savdo chek-listi', rcCap:'Kapital ($)', rcEntry:'Kirish narxi', rcStop:'Stop-loss narxi', rcTarget:'Take-profit narxi (ixtiyoriy)', rcRiskUsd:'Risk ($)', rcCoins:'Pozitsiya (coin)', rcPos:'Pozitsiya ($)', rcNeed:'Kapital, risk, kirish va stop narxini kiriting.', ck1:'1H uptrend / BOS tasdiqlangan', ck2:'Narx discount zonada (0.5–0.786)', ck3:'Likvidlik olindi (sweep)', ck4:'Stop-loss swing low ostida', ck5:'Xotirjam emotsiya / FOMO yo‘q', ckDone:'Hammasi tasdiqlandi — kirishingiz mumkin', gBadge:'🔒 Cheklangan kirish', gTitle:'alimovaura Journal', gSub:"Savdolaringizni intizom bilan boshqaring va natijangizni aniq ko'ring.", gF1:'📈 Hissiyot liniyasi', gF2:'📊 Oylik USD statistika', gF3:'♾️ Cheksiz savdo jadvali', gPrice:'$50 — Umrbod Kirish', gPriceSub:'(Lifetime Access)', gPay:"💳 Karta orqali to'lash ($50)", gCrypto:"🪙 Kripto (USDT) orqali to'lash ($50)", emoTitle:'Emotsiyalar liniyasi', noEmo:'Hissiyotlar yozilmagan', chart7d:'GRAFIK (24S)', tilt:'Ogohlantirish: ketma-ket zarar yoki FOMO/Ochko’zlik savdolari aniqlandi. Keyingi kirishdan oldin tanaffus qiling.', auditTitle:'Oylik AI audit va xatolar tahlili', noData:'Tahlil uchun hali savdo yo’q.', noLoss:'Bu oyda zararli savdo yo’q. Ajoyib intizom.',
     emoLoss:(e,n,p)=>`${e} holatida ochilgan ${n} ta savdo ${p} zarar keltirdi`,
     worst:(pr,tf,w)=>`${pr} (${tf}) eng ko’p stop-loss bergan juftlik — yutish ${w}%`,
     riskHi:(n,a)=>`${n} ta savdoda risk oylik o’rtacha (${a}%) dan yuqori bo’lgan`,
@@ -813,28 +841,70 @@ function coinIcon(base) {
   let h = 0; for (const c of b) h = (h * 31 + c.charCodeAt(0)) % 360;
   return wrap(`<circle cx="10" cy="10" r="10" fill="hsl(${h},70%,48%)"/><text x="10" y="13.6" text-anchor="middle" font-size="${b.length > 3 ? 7 : 8.5}" font-weight="700" fill="#ffffff" font-family="Arial,sans-serif">${esc(b.slice(0, 4))}</text>`);
 }
-/* ===== GRAFIK (7K): official TradingView Mini Symbol Overview widget, one per row ===== */
-function mountMiniCharts() {
-  document.querySelectorAll('.tvmini:not([data-done])').forEach(el => {
+/* ===== CHART column: last 24 hourly closes from Binance public API -> inline SVG sparkline (120x36).
+   Fallback (symbol unknown on Binance, or API offline): PnL-shaped SVG - up / down / wavy for breakeven. ===== */
+const SPARK_W = 120, SPARK_H = 36, SPARK_UP = '#16c784', SPARK_DN = '#ea3943', SPARK_FLAT = '#94a3b8';
+const SPARK_CACHE = new Map();   // symbol -> Promise<number[] | null>
+function sparkSymbol(pair) { return String(pair || '').replace(/[\s\/\-]/g, '').toUpperCase(); }
+function svgWrap(inner) {
+  return `<svg class="spark-svg" viewBox="0 0 ${SPARK_W} ${SPARK_H}" width="${SPARK_W}" height="${SPARK_H}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">${inner}</svg>`;
+}
+// Real market data: polyline through the 24 closes; green if latest >= first, red if latest < first
+function sparkRealSVG(vals) {
+  const pad = 3, n = vals.length, mn = Math.min(...vals), mx = Math.max(...vals), span = mx - mn;
+  const pts = vals.map((v, i) => {
+    const x = pad + i * (SPARK_W - 2 * pad) / Math.max(1, n - 1);
+    const y = span === 0 ? SPARK_H / 2 : pad + (mx - v) / span * (SPARK_H - 2 * pad);
+    return x.toFixed(1) + ',' + y.toFixed(1);
+  }).join(' ');
+  const col = vals[n - 1] >= vals[0] ? SPARK_UP : SPARK_DN;
+  return svgWrap(`<polyline points="${pts}" fill="none" stroke="${col}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>`);
+}
+// Fallback from the trade result: profit = smooth rise, loss = smooth fall, breakeven = grey wave.
+// Seeded by trade id so the shape stays identical across re-renders.
+function sparkFallbackSVG(p, id) {
+  const col = p > 0 ? SPARK_UP : p < 0 ? SPARK_DN : SPARK_FLAT;
+  let seed = 0; for (const c of String(id)) seed = (seed * 31 + c.charCodeAt(0)) >>> 0;
+  const rnd = () => { seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+  const N = 12, pad = 3, pts = [];
+  for (let i = 0; i < N; i++) {
+    const k = i / (N - 1), inner = i > 0 && i < N - 1;
+    let v;                                   // 0 = bottom, 1 = top
+    if (p > 0)      v = 0.15 + 0.7 * k + (inner ? (rnd() - 0.5) * 0.08 : 0);
+    else if (p < 0) v = 0.85 - 0.7 * k + (inner ? (rnd() - 0.5) * 0.08 : 0);
+    else            v = 0.5 + 0.18 * Math.sin(k * Math.PI * 4);
+    v = Math.min(1, Math.max(0, v));
+    pts.push([pad + i * (SPARK_W - 2 * pad) / (N - 1), pad + (1 - v) * (SPARK_H - 2 * pad)]);
+  }
+  return svgWrap(`<path d="${smoothPath(pts)}" fill="none" stroke="${col}" stroke-width="1.6" stroke-linecap="round"/>`);
+}
+// Binance kline: [openTime, open, high, low, close, ...]; index 4 = close. Cached per symbol; failures retry after 60s.
+function fetchSparkData(symbol) {
+  if (!SPARK_CACHE.has(symbol)) {
+    const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 8000);
+    const p = fetch('https://api.binance.com/api/v3/klines?symbol=' + encodeURIComponent(symbol) + '&interval=1h&limit=24', {signal: ctl.signal})
+      .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(k => (Array.isArray(k) && k.length >= 2 ? k.map(c => +c[4]) : null))
+      .catch(() => null)
+      .then(v => { if (!v) setTimeout(() => SPARK_CACHE.delete(symbol), 60000); return v; })
+      .finally(() => clearTimeout(timer));
+    SPARK_CACHE.set(symbol, p);
+  }
+  return SPARK_CACHE.get(symbol);
+}
+// Upgrades each rendered chart cell to live Binance data; the PnL fallback stays if no data comes back
+function mountSparks() {
+  document.querySelectorAll('.spark[data-spark]:not([data-done])').forEach(el => {
+    const sym = el.dataset.spark;
+    if (!sym) return;
     el.dataset.done = '1';
-    const base = String(el.dataset.tv).toUpperCase();
-    const wrap = document.createElement('div');
-    wrap.className = 'tradingview-widget-container';
-    const inner = document.createElement('div');
-    inner.className = 'tradingview-widget-container__widget';
-    wrap.appendChild(inner);
-    const sc = document.createElement('script');
-    sc.type = 'text/javascript';
-    sc.src = 'https://s3.tradingview.com/external-embedding/embed-widget-mini-symbol-overview.js';
-    sc.async = true;
-    sc.textContent = JSON.stringify({
-      symbol: 'BINANCE:' + base + 'USDT', width: '130', height: '42', locale: 'en',
-      dateRange: '7D', colorTheme: 'dark', isTransparent: true, chartOnly: true,
-      noTimeScale: true, autosize: false
+    fetchSparkData(sym).then(vals => {
+      if (vals && el.isConnected) el.innerHTML = sparkRealSVG(vals);
     });
-    wrap.appendChild(sc);
-    el.appendChild(wrap);
   });
+}
+function sparkHTML(t, p) {
+  return `<div class="spark" data-spark="${esc(sparkSymbol(t.pair))}">${sparkFallbackSVG(p, t.id)}</div>`;
 }
 function rowHTML(t) {
   const p = pnl(t), base = String(t.pair).replace(/(USDT|USDC|USD)$/, '');
@@ -848,7 +918,7 @@ function rowHTML(t) {
     <td class="ac num">1:${t.rr}</td>
     <td class="ac">${esc(t.tf || '—')}</td>
     <td class="al tags">${tags}</td>
-    <td class="ac chart-c"><div class="tvmini" data-tv="${esc(base)}"></div></td>
+    <td class="ac chart-c">${sparkHTML(t, p)}</td>
   </tr>`;
 }
 /* ===== New trade drawer: starts empty; a row is added only on Save ===== */
@@ -1201,7 +1271,7 @@ function periodTable(title, g) {
 }
 
 function render() {
-  requestAnimationFrame(mountMiniCharts);
+  requestAnimationFrame(mountSparks);
   $('#hero').innerHTML = heroHTML();
   $('#periods').innerHTML = periodCard();
   $('#drawer').innerHTML = drawerHTML();
@@ -1484,42 +1554,18 @@ function setZoom(z) {
 $('#zoomOut').onclick = () => setZoom(zoomLevel - ZOOM_STEP);
 $('#zoomIn').onclick = () => setZoom(zoomLevel + ZOOM_STEP);
 
-/* ===== Strict 1H Spot SMC Uptrend Scanner: live Bybit (OKX backup) data only; no placeholder coins ===== */
-let scanStatus = 'loading', scanResults = [];
-const SCAN_STABLE = /^(USDC|DAI|FDUSD|TUSD|USDD|USDE|PYUSD|BUSD|EUR|GBP|USDP|XUSD)$/;
-const SCAN_LEVERAGED = /(3L|3S|5L|5S|2L|2S|UP|DOWN|BULL|BEAR)$/;
-async function getJSON(url) {
-  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), 8000);
-  try {
-    const r = await fetch(url, {signal: ctl.signal});
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    return await r.json();
-  } finally { clearTimeout(timer); }
-}
-// Liquidity universe: all active USDT spot pairs sorted by 24h turnover (Bybit first, OKX backup)
-async function loadUniverse() {
-  try {
-    const j = await getJSON('https://api.bybit.com/v5/market/tickers?category=spot');
-    if (j.retCode !== 0) throw new Error('bybit');
-    return {src: 'bybit', list: j.result.list.filter(x => x.symbol.endsWith('USDT'))
-      .map(x => ({base: x.symbol.slice(0, -4), vol: +x.turnover24h}))};
-  } catch (e) {}
-  const j = await getJSON('https://www.okx.com/api/v5/market/tickers?instType=SPOT');
-  if (j.code !== '0') throw new Error('okx');
-  return {src: 'okx', list: j.data.filter(x => x.instId.endsWith('-USDT'))
-    .map(x => ({base: x.instId.split('-')[0], vol: +x.volCcy24h}))};
-}
-// Oldest -> newest. The newest candle returned by both exchanges is still forming.
-async function fetchCandles(src, base) {
-  if (src === 'bybit') {
-    const j = await getJSON('https://api.bybit.com/v5/market/kline?category=spot&symbol=' + base + 'USDT&interval=60&limit=220');
-    if (j.retCode !== 0) throw new Error('bybit kline');
-    return j.result.list.map(k => ({o: +k[1], h: +k[2], l: +k[3], c: +k[4]})).reverse();
-  }
-  const j = await getJSON('https://www.okx.com/api/v5/market/candles?instId=' + base + '-USDT&bar=1H&limit=220');
-  if (j.code !== '0') throw new Error('okx kline');
-  return j.data.map(k => ({o: +k[1], h: +k[2], l: +k[3], c: +k[4]})).reverse();
-}
+/* ===== Live 1H SMC Market Scanner Robot: Binance public market data (no API key), auto-refresh every 5 min =====
+   1) 24h tickers -> top 50 active USDT spot coins by quote volume (stablecoins and leveraged tokens excluded)
+   2) 1H klines (60 candles) for those 50, fetched in parallel batches
+   3) SMC rules (HH/HL uptrend, impulse, discount-zone correction, liquidity sweep, bullish close) -> top 10 by score */
+const ROBOT_TICKER = 'https://data-api.binance.vision/api/v3/ticker/24hr';
+const ROBOT_KLINES = 'https://data-api.binance.vision/api/v3/klines?symbol=';
+const ROBOT_TOP = 50, ROBOT_SHOW = 10, ROBOT_BATCH = 10;
+const ROBOT_INTERVAL_MS = 5 * 60 * 1000;
+const ROBOT_STABLE = /^(USDC|FDUSD|TUSD|USDP|DAI|BUSD|USDD|USDE|PYUSD|EUR|GBP|AEUR|USD1|USDS|XUSD|RLUSD)USDT$/;
+const ROBOT_LEVERAGED = /(UP|DOWN|BULL|BEAR)USDT$/;
+let robotState = {status: 'idle', results: [], updated: null, checked: 0, scanned: 0};
+let robotTimer = null;
 function emaOf(vals, p) {
   const k = 2 / (p + 1);
   let e = vals.slice(0, p).reduce((a, b) => a + b, 0) / p;
@@ -1541,43 +1587,70 @@ function swingPoints(c, L) {
   }
   return {hi, lo};
 }
-// Returns a result only if ALL rules pass; otherwise null
-function analyzeCoin(c, price) {
+// SMC rules on CLOSED 1H candles. Returns a setup only if every rule passes, otherwise null.
+function analyzeSMC(c) {
   const n = c.length;
-  if (n < 210) return null;
-  // Rule A: strict uptrend
-  const e50 = emaOf(c.map(k => k.c), 50), e200 = emaOf(c.map(k => k.c), 200);
-  if (!(price > e50 && price > e200)) return null;
-  const {hi, lo} = swingPoints(c, 3);
+  if (n < 40) return null;
+  const closes = c.map(k => k.c), price = closes[n - 1];
+  // Rule A: 1H uptrend - price above EMA20, Higher High + Higher Low structure
+  const e20 = emaOf(closes, 20);
+  if (!(price > e20)) return null;
+  const {hi, lo} = swingPoints(c, 2);
   if (hi.length < 2 || lo.length < 2) return null;
   const [h1, h2] = hi.slice(-2), [l1, l2] = lo.slice(-2);
   if (!(h2.p > h1.p && l2.p > l1.p)) return null;
-  // Rule B: impulse of at least +3%, price pulled back to the 50%–78.6% discount zone, swing low not broken
+  // Rule B: strong bullish impulse (>= 3%) from swing low L0 up to swing high H0 (within 30 candles)
   const H0 = hi[hi.length - 1];
-  const lowsBefore = lo.filter(l => l.i < H0.i && l.i >= H0.i - 100);
+  const lowsBefore = lo.filter(x => x.i < H0.i && x.i >= H0.i - 30);
   if (!lowsBefore.length) return null;
   const L0 = lowsBefore.reduce((a, b) => (b.p < a.p ? b : a));
   const range = H0.p - L0.p, imp = range / L0.p;
   if (imp < 0.03) return null;
-  const retr = (H0.p - price) / range;
-  if (!(retr >= 0.5 && retr <= 0.786)) return null;
+  // Rule C: controlled correction - pullback stays above L0 and price sits in the 50%-78.6% discount zone
   const after = c.slice(H0.i + 1);
-  if (!after.length) return null;
+  if (after.length < 2) return null;
   const pbLow = Math.min(...after.map(k => k.l));
   if (pbLow <= L0.p) return null;
-  // Rule C: a minor low inside the discount zone was swept, and the latest closed candle is green
-  const zoneLow = H0.p - range * 0.786, zoneHigh = H0.p - range * 0.5;
-  const IL = lo.find(l => l.i > H0.i && l.p >= zoneLow && l.p <= zoneHigh);
+  const retr = (H0.p - price) / range;
+  if (!(retr >= 0.5 && retr <= 0.786)) return null;
+  // Rule D: minor low inside the zone swept (liquidity grab) and the last closed 1H candle is bullish
+  const zoneHigh = H0.p - range * 0.5, zoneLow = H0.p - range * 0.786;
+  const IL = lo.find(x => x.i > H0.i && x.p >= zoneLow && x.p <= zoneHigh);
   if (!IL) return null;
   const swept = pbLow < IL.p;
   const last = c[n - 1];
   if (!(swept && last.c > last.o)) return null;
-  // Confluence score (60–100): base for passing every rule + impulse size + Fib 61.8 proximity + trend strength + sweep depth
+  // Setup quality 60-100: impulse size + Fib 61.8 proximity + trend strength + sweep depth
   const impS = Math.min(imp / 0.08, 1) * 10;
   const fibS = (1 - Math.min(Math.abs(retr - 0.618) / 0.118, 1)) * 10;
-  const trendS = Math.min((price - e200) / e200 / 0.05, 1) * 10;
+  const trendS = Math.min((price - e20) / e20 / 0.02, 1) * 10;
   const sweepS = Math.min((IL.p - pbLow) / IL.p / 0.01, 1) * 10;
-  return {price, score: Math.round(60 + impS + fibS + trendS + sweepS)};
+  return {zoneLow, zoneHigh, sl: pbLow * 0.999, score: Math.round(60 + impS + fibS + trendS + sweepS)};
+}
+async function rbFetchJSON(url, ms) {
+  const ctl = new AbortController(), timer = setTimeout(() => ctl.abort(), ms);
+  try {
+    const r = await fetch(url, {signal: ctl.signal});
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  } finally { clearTimeout(timer); }
+}
+// Step 1: live 24h tickers -> top 50 active USDT spot coins by quote volume
+async function fetchTop50() {
+  const all = await rbFetchJSON(ROBOT_TICKER, 12000);
+  if (!Array.isArray(all)) throw new Error('ticker');
+  return all
+    .filter(x => x.symbol.endsWith('USDT') && !ROBOT_STABLE.test(x.symbol) && !ROBOT_LEVERAGED.test(x.symbol) && +x.count > 0 && +x.quoteVolume > 0)
+    .sort((a, b) => +b.quoteVolume - +a.quoteVolume)
+    .slice(0, ROBOT_TOP)
+    .map(x => ({sym: x.symbol, price: +x.lastPrice, chg: +x.priceChangePercent}));
+}
+// Step 2: 60 x 1H klines. Kline fields: [openTime, open, high, low, close, ...]
+async function fetchKlines1H(symbol) {
+  try {
+    const k = await rbFetchJSON(ROBOT_KLINES + symbol + '&interval=1h&limit=60', 8000);
+    return Array.isArray(k) && k.length >= 40 ? k.map(x => ({o: +x[1], h: +x[2], l: +x[3], c: +x[4]})) : null;
+  } catch (e) { return null; }
 }
 async function mapLimit(items, limit, fn) {
   const out = new Array(items.length);
@@ -1591,46 +1664,84 @@ async function mapLimit(items, limit, fn) {
   await Promise.all(workers);
   return out;
 }
-async function runScan() {
-  scanStatus = 'loading'; scanResults = [];
-  let uni = null;
-  try { uni = await loadUniverse(); } catch (e) { uni = null; }
-  if (!uni) { scanStatus = 'offline'; renderScanner(); return; }
-  const coins = uni.list
-    .filter(x => x.base && !SCAN_STABLE.test(x.base) && !SCAN_LEVERAGED.test(x.base) && x.vol > 0)
-    .sort((a, b) => b.vol - a.vol);
-  const top = coins.slice(0, Math.ceil(coins.length / 2));   // Top 50% most liquid
-  let answered = 0;
-  const res = await mapLimit(top, 8, async coin => {
-    const arr = await fetchCandles(uni.src, coin.base);
-    answered++;
-    const closed = arr.slice(0, -1), price = arr[arr.length - 1].c;
-    const r = analyzeCoin(closed, price);
-    return r ? {...r, base: coin.base} : null;
+function fmtPrice(v) {
+  return '$' + v.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: v < 0.01 ? 8 : v < 1 ? 6 : 2});
+}
+// Full pipeline; previous results stay visible while loading.
+async function runRobot() {
+  if (robotState.status === 'loading') return;
+  robotState = {...robotState, status: 'loading'};
+  renderScanner();
+  let coins = null;
+  try { coins = await fetchTop50(); } catch (e) { coins = null; }
+  if (!coins || !coins.length) {
+    robotState = {status: 'offline', results: [], updated: robotState.updated, checked: 0, scanned: 0};
+    renderScanner();
+    return;
+  }
+  let ok = 0;
+  const res = await mapLimit(coins, ROBOT_BATCH, async coin => {
+    const c = await fetchKlines1H(coin.sym);
+    if (!c) return null;
+    ok++;
+    const r = analyzeSMC(c.slice(0, -1));   // drop the still-forming candle
+    return r ? {...r, sym: coin.sym, price: coin.price, chg: coin.chg} : null;
   });
-  if (answered === 0) { scanStatus = 'offline'; renderScanner(); return; }
-  scanResults = res.filter(Boolean).sort((a, b) => b.score - a.score).slice(0, 10);
-  scanStatus = 'done';
+  if (!ok) {
+    robotState = {status: 'offline', results: [], updated: robotState.updated, checked: 0, scanned: coins.length};
+  } else {
+    robotState = {
+      status: 'done',
+      results: res.filter(Boolean).sort((a, b) => b.score - a.score).slice(0, ROBOT_SHOW),
+      updated: new Date(), checked: ok, scanned: coins.length
+    };
+  }
   renderScanner();
 }
-function fmtPrice(v) {
-  return '$' + v.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: v < 1 ? 6 : 2});
+function startRobot() {
+  runRobot();
+  clearInterval(robotTimer);
+  robotTimer = setInterval(runRobot, ROBOT_INTERVAL_MS);
 }
-// Shows only verified coins. Offline or no-match states show one muted pill and never fake coins.
+function rbCardHTML(r, i) {
+  const base = r.sym.replace(/USDT$/, '');
+  const up = r.chg >= 0;
+  const tv = 'https://www.tradingview.com/chart/?symbol=BINANCE:' + r.sym + '&interval=60';
+  return `<div class="card rb-card">
+    <div class="rb-top"><span class="rb-rank">#${i + 1}</span><b>${esc(base)}/USDT</b></div>
+    <div class="rb-price">${esc(fmtPrice(r.price))} <span class="${up ? 'pos' : 'neg'} rb-chg">${up ? '+' : ''}${r.chg.toFixed(2)}%</span></div>
+    <div class="rb-sig"><span class="rb-badge">1H SMC Entry</span><span class="rb-score">${r.score}%</span></div>
+    <div class="rb-kv"><span>${esc(T('scEntry'))}</span><b>${esc(fmtPrice(r.zoneLow))} – ${esc(fmtPrice(r.zoneHigh))}</b></div>
+    <div class="rb-kv"><span>${esc(T('scSL'))}</span><b class="neg">${esc(fmtPrice(r.sl))}</b></div>
+    <a class="rb-tv" href="${esc(tv)}" target="_blank" rel="noopener">${esc(T('rbTv'))}</a>
+  </div>`;
+}
 function renderScanner() {
   const el = document.getElementById('scanner'); if (!el) return;
-  if (scanStatus === 'offline') { el.innerHTML = `<div class="sc-pill">${esc(T('scPill'))}</div>`; return; }
-  if (scanStatus !== 'done') { el.innerHTML = ''; return; }
-  if (!scanResults.length) { el.innerHTML = `<div class="sc-pill">${esc(T('scNone'))}</div>`; return; }
-  el.innerHTML = '<div class="sc-row-h">' + scanResults.map(r =>
-    `<a class="card mini" href="https://tradingview.com" target="_blank" rel="noopener"><b>${esc(r.base)}/USDT</b><span class="mv">${r.score}%</span><span class="mp">${esc(fmtPrice(r.price))}</span></a>`
-  ).join('') + '</div>';
+  const s = robotState, busy = s.status === 'loading', off = s.status === 'offline';
+  const stamp = s.updated ? s.updated.toLocaleTimeString(LOC[lang], {hour: '2-digit', minute: '2-digit'}) : '';
+  const status = busy ? T('rbScanning') : off ? T('scError') : s.results.length ? T('rbReady') : T('scNone');
+  let body;
+  if (s.results.length) body = `<div class="rb-row-h">${s.results.map(rbCardHTML).join('')}</div>`;
+  else if (busy) body = `<div class="sc-pill">${esc(T('rbScanning'))}</div>`;
+  else if (off) body = `<div class="sc-pill">${esc(T('scError'))}</div>`;
+  else if (s.status === 'done') body = `<div class="sc-pill">${esc(T('scNone'))}</div>`;
+  else body = `<div class="sc-pill">${esc(T('scLoading'))}</div>`;
+  el.innerHTML = `<div class="card rb-wrap">
+    <div class="rb-head">
+      <div class="rb-title"><span class="rb-pulse${off ? ' off' : ''}"></span><b>${esc(T('scTitle'))}</b><span class="rb-live">${esc(status)}</span></div>
+      <div class="rb-meta"><span class="rb-stat">${esc(T('rbAuto'))}</span>${stamp ? `<span class="rb-stat">${esc(T('rbUpdated'))}: ${esc(stamp)}</span>` : ''}${s.scanned ? `<span class="rb-stat">${s.checked} / ${s.scanned}</span>` : ''}<button type="button" id="robotRescan" class="rb-btn"${busy ? ' disabled' : ''}>${esc(T('rbRescan'))}</button></div>
+    </div>
+    ${body}
+    <div class="rb-foot">${esc(T('scDisc'))}</div>
+  </div>`;
 }
+document.addEventListener('click', e => { if (e.target.closest && e.target.closest('#robotRescan')) runRobot(); });
 
 applyZoom();
 applyTheme();
 applyStatic();
 render();
-runScan();
+startRobot();
 </script>
 </body></html>
