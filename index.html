@@ -4,7 +4,7 @@
 <script>/* PAYWALL SWITCH: false = journal opens directly (testing). true = $50 paywall is enforced. */
 window.BCPJ_PAYWALL=true;
 try{document.documentElement.dataset.theme=localStorage.getItem('bcpj_theme')==='light'?'light':'dark';}catch(e){}
-(function(){var K='allkey_pro_992tx',P=new URLSearchParams(location.search).get('access_granted')===K,S=false;try{S=localStorage.getItem('bcpj_vip_v1')===K;if(P)localStorage.setItem('bcpj_vip_v1',K);}catch(e){}var ok=!window.BCPJ_PAYWALL||P||S;
+(function(){var KEYS=[['access-granted','alikey_pro_992lx'],['access_granted','allkey_pro_992tx']],q=new URLSearchParams(location.search),P=KEYS.some(function(k){return q.get(k[0])===k[1];}),ok=!window.BCPJ_PAYWALL||P;
 if(ok)document.documentElement.classList.remove('locked');else document.documentElement.classList.add('locked');})();</script>
 <script>/* Mini App: inline manifest + icons (no external files) */
 (function(){
@@ -1607,23 +1607,22 @@ $('#imp').onchange = e => {
 /* ===== Paywall: $50 Pro Access via Lava.top ===== */
 const PAY_URL = 'https://app.lava.top/products/9d6ae9a8-4862-4fc4-8781-c85d512be5f5';
 const CRYPTO_URL = 'https://app.paymento.io/payment-link/eca6e71daae142e08654b6f0d26e78d7';
-const SECRET_PARAM = 'access_granted';
-const SECRET_VALUE = 'allkey_pro_992tx';
-const VIP_KEY = 'bcpj_vip_v1';
-function vipSave() { try { localStorage.setItem(VIP_KEY, SECRET_VALUE); } catch (e) {} }
-function vipStored() { try { return localStorage.getItem(VIP_KEY) === SECRET_VALUE; } catch (e) { return false; } }
+// Accepted unlock URLs: ?access-granted=alikey_pro_992lx  and  ?access_granted=allkey_pro_992tx (existing customer links)
+const UNLOCK_KEYS = [['access-granted', 'alikey_pro_992lx'], ['access_granted', 'allkey_pro_992tx']];
+function urlUnlocked() {
+  const q = new URLSearchParams(location.search);
+  return UNLOCK_KEYS.some(([p, v]) => q.get(p) === v);
+}
 function isUnlocked() {
   if (!window.BCPJ_PAYWALL) return true;
-  if (new URLSearchParams(location.search).get(SECRET_PARAM) === SECRET_VALUE) { vipSave(); return true; }
-  return vipStored();
+  return urlUnlocked();          // nothing is stored: every normal load starts locked
 }
 function grantAccess() {
   document.documentElement.classList.remove('locked');
   $('#gate').classList.add('hidden');
   document.documentElement.classList.remove('locked');
 }
-const qs = new URLSearchParams(location.search);
-if (qs.get(SECRET_PARAM) === SECRET_VALUE) { vipSave(); grantAccess(); }
+if (urlUnlocked()) grantAccess();
 if (!isUnlocked()) $('#gate').classList.remove('hidden');
 
 $('#payBtn').onclick = () => { window.location.href = PAY_URL; };
